@@ -1,0 +1,30 @@
+.team-logo {
+    width: 100px;
+    margin: 10px;
+
+    /* turn whites into yellow */
+    -webkit-filter: grayscale(0) brightness(0) invert(100%) sepia(100%) hue-rotate(360deg) saturate(100);
+    filter: grayscale(0) brightness(0) invert(100%) sepia(100%) hue-rotate(360deg) saturate(100);
+}
+
+.group-chooser {
+    padding-top: 0 !important;
+    height: 100%;
+}
+
+.group-chooser > .mdl-navigation__link:hover {
+    background-color: #00ACC1 !important;
+}
+
+.mdl-layout__drawer-button > .material-icons {
+    line-height: 48px;
+}
+
+.mdl-layout__drawer {
+    border-right: 0;
+}
+
+.mdl-navigation__link {
+    color: white !important;
+    transition: background-color 0.1s ease;
+}
