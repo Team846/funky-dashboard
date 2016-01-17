@@ -23,7 +23,7 @@ lazy val server = project.settings(
   ),
   managedResources in Compile ++= sjsFiles.value,
   publishMavenStyle := true,
-  publishTo := Some(Resolver.file("gh-pages-repo", baseDirectory.value / "repo"))
+  publishTo := Some(Resolver.file("gh-pages-repo", baseDirectory.value / ".." / "repo"))
 )
 
 lazy val client = project.settings(
