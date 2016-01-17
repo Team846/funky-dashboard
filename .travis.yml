@@ -1,0 +1,6 @@
+language: scala
+jdk: oraclejdk8
+after_success:
+  - 'if [[ $TRAVIS_PULL_REQUEST == "false" ]]; then bash ./deploy.sh; fi'
+notifications:
+  slack: team846:C7msa8tAKGdHScWVPPVL3DnB

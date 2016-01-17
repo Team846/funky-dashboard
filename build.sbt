@@ -21,7 +21,9 @@ lazy val server = project.settings(
   resourceDirectories in Compile ++= Seq(
     (crossTarget in client).value / "server-resources"
   ),
-  managedResources in Compile ++= sjsFiles.value
+  managedResources in Compile ++= sjsFiles.value,
+  publishMavenStyle := true,
+  publishTo := Some(Resolver.file("gh-pages-repo", baseDirectory.value / "repo"))
 )
 
 lazy val client = project.settings(
