@@ -5,4 +5,8 @@ script:
 after_success:
   - 'if [[ $TRAVIS_PULL_REQUEST == "false" ]]; then bash ./deploy.sh; fi'
 notifications:
-  slack: team846:C7msa8tAKGdHScWVPPVL3DnB
+  slack:
+    rooms:
+      - team846:C7msa8tAKGdHScWVPPVL3DnB
+    on_success: change
+    on_failure: always

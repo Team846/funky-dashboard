@@ -90,7 +90,7 @@ public class FunkyDashboard extends HttpApp {
                             ctx.request(),
                             Source.tick(
                                     new FiniteDuration(0, TimeUnit.MILLISECONDS),
-                                    new FiniteDuration(40, TimeUnit.MILLISECONDS),
+                                    new FiniteDuration(80, TimeUnit.MILLISECONDS),
                                     0
                             ).map(tick -> TextMessage.create(currentDatasetsJSON().toString())),
                             Sink.ignore()
