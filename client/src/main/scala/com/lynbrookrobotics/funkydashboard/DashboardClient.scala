@@ -11,6 +11,7 @@ import org.scalajs.jquery._
 object DashboardClient extends JSApp {
   val groupChooser = jQuery("#group-chooser")
   val sideDrawer = jQuery(".mdl-layout__drawer")
+  lazy val pauseButton = document.getElementById("pause-button").asInstanceOf[html.Button]
 
   val websocketProtocol = if (window.location.protocol == "https") {
     "wss"
@@ -18,20 +19,28 @@ object DashboardClient extends JSApp {
     "ws"
   }
 
+  var pause = false
   def initWebsocket(datasetsTree: Map[String, Map[String, Dataset[Nothing]]]): Unit = {
     val datastream = new WebSocket(s"$websocketProtocol://${window.location.host}/datastream")
     datastream.onmessage = (e: MessageEvent) => {
-      val currentDataDictionary = JSON.parse(e.data.toString).asInstanceOf[js.Dictionary[js.Any]]
-      currentDataDictionary.foreach { case (groupName, datasetsObject) =>
-        val datasets = datasetsObject.asInstanceOf[js.Dictionary[js.Any]]
-        datasets.foreach { case (datasetName, currentValueObject) =>
-          datasetsTree(groupName)(datasetName).update(currentValueObject)
+      if (!pause) {
+        val currentDataDictionary = JSON.parse(e.data.toString).asInstanceOf[js.Dictionary[js.Any]]
+        currentDataDictionary.foreach { case (groupName, datasetsObject) =>
+          val datasets = datasetsObject.asInstanceOf[js.Dictionary[js.Any]]
+          datasets.foreach { case (datasetName, currentValueObject) =>
+            datasetsTree(groupName)(datasetName).update(currentValueObject)
+          }
         }
       }
+
     }
   }
 
   def main(): Unit = {
+    pauseButton.onclick = (e: MouseEvent) => {
+      pause = !pause
+    } // => create function
+
     Ajax.get("/datasets.json").foreach { result =>
       val datasetGroups = JSON.parse(result.responseText).asInstanceOf[js.Array[DatasetGroup]]
       val tree = datasetGroups.toList.zipWithIndex.map { case (datasetGroup, index) =>
