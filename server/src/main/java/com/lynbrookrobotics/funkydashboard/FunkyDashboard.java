@@ -1,18 +1,29 @@
 package com.lynbrookrobotics.funkydashboard;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Cancellable;
 import akka.http.impl.util.WebsocketConstructor;
 import akka.http.javadsl.model.ContentTypes;
+import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.TextMessage;
 import akka.http.javadsl.server.HttpApp;
 import akka.http.javadsl.server.Route;
+import akka.stream.ActorMaterializer;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonValue;
-import scala.concurrent.duration.FiniteDuration;
+import com.typesafe.config.ConfigFactory;
 
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
+import scala.runtime.BoxedUnit;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Random;
@@ -20,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FunkyDashboard extends HttpApp {
     public static void main(String[] args) throws IOException {
-        ActorSystem system = ActorSystem.create();
+        ActorSystem system = ActorSystem.create("server", ConfigFactory.parseFile(new File("application-server.conf")));
 
         FunkyDashboard dashboard = new FunkyDashboard();
         dashboard.bindRoute("localhost", 8080, system);
@@ -29,6 +40,8 @@ public class FunkyDashboard extends HttpApp {
 
         dashboard.datasetGroup("hello").addDataset(new TimeSeriesNumeric<>("Current Time", random::nextDouble));
         dashboard.datasetGroup("byebye").addDataset(new TimeSeriesNumeric<>("Current Time Nanos", random::nextInt));
+
+        dashboard.attachBlackbox(system.actorFor("akka.tcp://blackbox@localhost:2552/user/receiver"), system);
 
         System.out.println("Press enter to quit");
         System.in.read();
@@ -66,6 +79,21 @@ public class FunkyDashboard extends HttpApp {
         );
     }
 
+    Source<String, Cancellable> outJSON = Source.tick(
+            new FiniteDuration(0, TimeUnit.MILLISECONDS),
+            new FiniteDuration(80, TimeUnit.MILLISECONDS),
+            0
+    ).map(tick -> currentDatasetsJSON().toString());
+
+    Source<Message, Cancellable> source =
+            outJSON.map(TextMessage::create);
+
+    public void attachBlackbox(ActorRef target, ActorSystem system) {
+        outJSON.runWith(
+                Sink.actorRef(target, ""),
+                ActorMaterializer.create(system)
+        );
+    }
 
     @Override
     public Route createRoute() {
@@ -88,11 +116,7 @@ public class FunkyDashboard extends HttpApp {
                     handleWith(ctx ->
                         ctx.complete(WebsocketConstructor.handleWebsocketRequestWith(
                             ctx.request(),
-                            Source.tick(
-                                    new FiniteDuration(0, TimeUnit.MILLISECONDS),
-                                    new FiniteDuration(80, TimeUnit.MILLISECONDS),
-                                    0
-                            ).map(tick -> TextMessage.create(currentDatasetsJSON().toString())),
+                            source,
                             Sink.ignore()
                         ))
                     )
