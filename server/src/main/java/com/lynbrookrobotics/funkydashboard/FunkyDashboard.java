@@ -19,6 +19,7 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonValue;
 import com.typesafe.config.ConfigFactory;
 
+import scala.Tuple2;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 import scala.runtime.BoxedUnit;
@@ -79,17 +80,17 @@ public class FunkyDashboard extends HttpApp {
         );
     }
 
-    Source<String, Cancellable> outJSON = Source.tick(
+    Source<Tuple2<Long, String>, Cancellable> outJSON = Source.tick(
             new FiniteDuration(0, TimeUnit.MILLISECONDS),
             new FiniteDuration(80, TimeUnit.MILLISECONDS),
             0
-    ).map(tick -> currentDatasetsJSON().toString());
+    ).map(tick -> Tuple2.apply(System.currentTimeMillis(), currentDatasetsJSON().toString()));
 
     Source<Message, Cancellable> source =
-            outJSON.map(TextMessage::create);
+            outJSON.map(v -> TextMessage.create(v._2));
 
     public void attachBlackbox(ActorRef target, ActorSystem system) {
-        outJSON.runWith(
+        outJSON.map(t -> t._1 + " " + t._2).runWith(
                 Sink.actorRef(target, ""),
                 ActorMaterializer.create(system)
         );
