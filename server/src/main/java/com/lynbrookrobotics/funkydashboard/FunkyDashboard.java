@@ -82,7 +82,7 @@ public class FunkyDashboard extends HttpApp {
 
     Source<Tuple2<Long, String>, Cancellable> outJSON = Source.tick(
             new FiniteDuration(0, TimeUnit.MILLISECONDS),
-            new FiniteDuration(80, TimeUnit.MILLISECONDS),
+            new FiniteDuration(250, TimeUnit.MILLISECONDS),
             0
     ).map(tick -> Tuple2.apply(System.currentTimeMillis(), currentDatasetsJSON().toString()));
 
@@ -92,6 +92,13 @@ public class FunkyDashboard extends HttpApp {
     public void attachBlackbox(ActorRef target, ActorSystem system) {
         outJSON.map(t -> t._1 + " " + t._2).runWith(
                 Sink.actorRef(target, ""),
+                ActorMaterializer.create(system)
+        );
+    }
+
+    public void outputText(ActorSystem system) {
+        outJSON.map(t -> t._2).runForeach(
+                System.out::println,
                 ActorMaterializer.create(system)
         );
     }
