@@ -20,26 +20,29 @@ object DashboardClient extends JSApp {
   }
 
   var pause = false
-  def initWebsocket(datasetsTree: Map[String, Map[String, Dataset[Nothing]]]): Unit = {
+  def initWebsocket(datasetsTree: Map[String, (Map[String, Dataset[Nothing]], () => Boolean)]): Unit = {
     val datastream = new WebSocket(s"$websocketProtocol://${window.location.host}/datastream")
     datastream.onmessage = (e: MessageEvent) => {
       if (!pause) {
         val currentDataDictionary = JSON.parse(e.data.toString).asInstanceOf[js.Dictionary[js.Any]]
         currentDataDictionary.foreach { case (groupName, datasetsObject) =>
           val datasets = datasetsObject.asInstanceOf[js.Dictionary[js.Any]]
-          datasets.foreach { case (datasetName, currentValueObject) =>
-            datasetsTree(groupName)(datasetName).update(currentValueObject)
+          val group = datasetsTree(groupName)
+
+          if (group._2()) {
+            datasets.foreach { case (datasetName, currentValueObject) =>
+              group._1(datasetName).update(currentValueObject)
+            }
           }
         }
       }
-
     }
   }
 
   def main(): Unit = {
     pauseButton.onclick = (e: MouseEvent) => {
       pause = !pause
-    } // => create function
+    }
 
     Ajax.get("/datasets.json").foreach { result =>
       val datasetGroups = JSON.parse(result.responseText).asInstanceOf[js.Array[DatasetGroup]]
@@ -52,6 +55,7 @@ object DashboardClient extends JSApp {
           datasetDefinition.name -> dataset
         }.toMap
 
+        var isVisible = index == 0
         groupView.style.display = if (index == 0) "flex" else "none"
         document.getElementById("groups-container").appendChild(groupView)
 
@@ -70,14 +74,16 @@ object DashboardClient extends JSApp {
             elem.asInstanceOf[html.Anchor].style.backgroundColor =
               if (sidebarLink == elem) "#00ACC1" else "transparent"
           }
-//          println(s"${element.name} clicked!")
+
           sideDrawer.removeClass("is-visible")
+
+          isVisible = true
           e.preventDefault()
         }
 
         groupChooser.append(sidebarLink)
 
-        datasetGroup.name -> datasets
+        datasetGroup.name -> (datasets, () => isVisible)
       }.toMap
 
       initWebsocket(tree)

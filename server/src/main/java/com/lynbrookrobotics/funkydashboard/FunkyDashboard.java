@@ -82,7 +82,7 @@ public class FunkyDashboard extends HttpApp {
 
     Source<Tuple2<Long, String>, Cancellable> outJSON = Source.tick(
             new FiniteDuration(0, TimeUnit.MILLISECONDS),
-            new FiniteDuration(250, TimeUnit.MILLISECONDS),
+            new FiniteDuration(125, TimeUnit.MILLISECONDS),
             0
     ).map(tick -> Tuple2.apply(System.currentTimeMillis(), currentDatasetsJSON().toString()));
 
