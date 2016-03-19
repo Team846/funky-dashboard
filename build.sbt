@@ -34,4 +34,7 @@ lazy val client = project.settings(
   publishLocal := {}
 )
 
-lazy val blackbox = project.dependsOn(server)
+lazy val blackbox = project.dependsOn(server).settings(
+  publish := {},
+  publishLocal := {}
+)
