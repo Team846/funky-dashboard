@@ -32,6 +32,8 @@ object Dataset {
     definition.`type` match {
       case "time-series-numeric" =>
         new TimeSeriesNumeric(definition.name, definition.properties.asInstanceOf)
+      case "image-stream" =>
+        new ImageStream(definition.name)
     }
   }
 }
