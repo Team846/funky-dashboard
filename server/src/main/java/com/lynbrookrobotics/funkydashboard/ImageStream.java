@@ -33,7 +33,7 @@ public class ImageStream extends Dataset {
             baos.flush();
             return Json.value(Base64.getEncoder().encodeToString(baos.toByteArray()));
         } catch (Throwable e) {
-            throw new RuntimeException("Couldn't write image to bytes");
+            return Json.value("");
         }
     }
 }
