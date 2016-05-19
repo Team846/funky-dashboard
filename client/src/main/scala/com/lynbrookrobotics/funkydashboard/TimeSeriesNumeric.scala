@@ -28,12 +28,12 @@ class TimeSeriesNumeric(name: String, properties: TimeSeriesNumericProperties) e
 
   override def updateDisplay(newData: String): Unit = {
     val parsedDisplay: Number = properties.numberType match {
-      case "byte" => java.lang.Byte.parseByte(newData)
-      case "double" => java.lang.Double.parseDouble(newData)
-      case "float" => java.lang.Float.parseFloat(newData)
-      case "integer" => java.lang.Integer.parseInt(newData)
-      case "long" => java.lang.Long.parseLong(newData)
-      case "short" => java.lang.Short.parseShort(newData)
+      case "byte" => newData.toByte
+      case "double" => newData.toDouble
+      case "float" => newData.toFloat
+      case "integer" => newData.toInt
+      case "long" => newData.toLong
+      case "short" => newData.toShort
     }
 
     if (currentData.length == 50) {
@@ -56,6 +56,9 @@ class TimeSeriesNumeric(name: String, properties: TimeSeriesNumericProperties) e
       )
     )
 
-    textDisplay.innerHTML = parsedDisplay.toString
+    textDisplay.innerHTML =
+      if (Seq("byte", "integer", "long", "short").contains(properties.numberType))
+        parsedDisplay.longValue().toString
+      else f"${parsedDisplay.doubleValue()}%.2f"
   }
 }

@@ -39,10 +39,8 @@ public class FunkyDashboard extends HttpApp {
 
         Random random = new Random();
 
-        dashboard.datasetGroup("hello").addDataset(new TimeSeriesNumeric<>("Current Time", random::nextDouble));
-        dashboard.datasetGroup("byebye").addDataset(new TimeSeriesNumeric<>("Current Time Nanos", random::nextInt));
-
-        dashboard.attachBlackbox(system.actorFor("akka.tcp://blackbox@localhost:2552/user/receiver"), system);
+        dashboard.datasetGroup("hello").addDataset(new TimeSeriesNumeric<>("Random Double", random::nextDouble));
+        dashboard.datasetGroup("byebye").addDataset(new TimeSeriesNumeric<>("Random Int", random::nextInt));
 
         System.out.println("Press enter to quit");
         System.in.read();
