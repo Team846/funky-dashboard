@@ -2,12 +2,14 @@ publish := {}
 publishLocal := {}
 
 val sjsFiles = Def.taskDyn {
-  (fullOptJS in (client, Compile)).map { _ =>
+  (fastOptJS in (client, Compile)).map { _ =>
     val root = (crossTarget in client).value / "server-resources" / "META-INF" / "resources"
     Seq(
       root,
       root / "sjs",
+      root / "sjs" / "client-fastopt.js",
       root / "sjs" / "client-opt.js",
+      root / "sjs" / "client-jsdeps.js",
       root / "sjs" / "client-jsdeps.min.js",
       root / "sjs" / "client-launcher.js"
     )
@@ -27,7 +29,7 @@ lazy val server = project.settings(
 )
 
 lazy val client = project.settings(
-  Seq(packageScalaJSLauncher, fullOptJS, packageJSDependencies) map { packageJSKey =>
+  Seq(packageScalaJSLauncher, fastOptJS, fullOptJS, packageJSDependencies, packageMinifiedJSDependencies) map { packageJSKey =>
     crossTarget in (Compile, packageJSKey) := crossTarget.value / "server-resources" / "META-INF" / "resources"/ "sjs"
   },
   publish := {},

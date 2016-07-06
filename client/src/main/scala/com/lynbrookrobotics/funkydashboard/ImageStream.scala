@@ -1,20 +1,29 @@
 package com.lynbrookrobotics.funkydashboard
 
-import org.scalajs.dom._
+import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, ReactComponentU, TopNode}
+import japgolly.scalajs.react.vdom.all._
 
-import scala.scalajs.js
-import org.scalajs.jquery._
+object ImageStream {
+  case class Props(newPoints: List[String])
 
-import com.lynbrookrobotics.flot.Flot._
+  class Backend($: BackendScope[Props, Unit]) {
+    def render(props: Props) = {
+      val images = $.props.runNow().newPoints
+      val last = if (images.nonEmpty) images.last else ""
 
-class ImageStream(name: String) extends Dataset[String](name) {
-  val image = document.createElement("img").asInstanceOf[html.Image]
-  image.style.width = "100%"
+      div(
+        img(src := s"data:image/png;base64,$last")
+      )
+    }
+  }
 
-  override val dataDisplay: html.Element = document.createElement("div").asInstanceOf[html.Div]
-  dataDisplay.appendChild(image)
+  val component = ReactComponentB[Props](getClass.getSimpleName)
+    .stateless
+    .renderBackend[Backend]
+    .shouldComponentUpdate(_.nextProps.newPoints.nonEmpty)
+    .build
 
-  override def updateDisplay(newData: String): Unit = {
-    image.src = s"data:image/png;base64,$newData"
+  def apply(newPoints: List[String]) = {
+    component(Props(newPoints))
   }
 }

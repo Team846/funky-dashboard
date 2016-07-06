@@ -1,39 +1,19 @@
 package com.lynbrookrobotics.funkydashboard
 
-import org.scalajs.dom._
-
-import scala.scalajs.js
-
-abstract class Dataset[-U](name: String) {
-  val dataDisplay: html.Element
-  lazy val card: html.Element = {
-    val baseElement = document.createElement("div").asInstanceOf[html.Div]
-    baseElement.className = "mdl-card mdl-shadow--16dp mdl-cell mdl-cell--6-col"
-    baseElement.style.minHeight = "0px"
-    baseElement.appendChild(dataDisplay)
-
-    val cardTitle = document.createElement("div").asInstanceOf[html.Div]
-    cardTitle.className = "mdl-card__title"
-    cardTitle.innerHTML = name
-    baseElement.appendChild(cardTitle)
-
-    baseElement
-  }
-
-  def update(newData: js.Any): Unit = {
-    updateDisplay(newData.asInstanceOf[U])
-  }
-
-  def updateDisplay(newData: U)
-}
+import japgolly.scalajs.react.{ReactComponentU, TopNode}
 
 object Dataset {
-  def extract(definition: DatasetDefinition): Dataset[Nothing] = {
+  def extract(definition: DatasetDefinition): List[Any] => ReactComponentU[_, _, _, TopNode] = {
     definition.`type` match {
       case "time-series-numeric" =>
-        new TimeSeriesNumeric(definition.name, definition.properties.asInstanceOf)
+        values => TimeSeriesNumeric(
+          definition.properties.asInstanceOf[TimeSeriesNumericProperties],
+          values.map(_.asInstanceOf[String])
+        )
       case "image-stream" =>
-        new ImageStream(definition.name)
+        values => ImageStream(
+          values.map(_.asInstanceOf[String])
+        )
     }
   }
 }
