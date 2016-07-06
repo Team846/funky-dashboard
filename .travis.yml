@@ -16,3 +16,6 @@ notifications:
       - team846:C7msa8tAKGdHScWVPPVL3DnB
     on_success: change
     on_failure: always
+branches:
+  only:
+    - master
