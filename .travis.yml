@@ -1,5 +1,11 @@
 language: scala
 jdk: oraclejdk8
+before_script:
+  - cd ..
+  - git clone https://github.com/payalabs/scalajs-react-mdl.git
+  - cd scalajs-react-mdl
+  - sbt publishLocal
+  - cd ../funky-dashboard
 script:
   - sbt compile
 after_success:
@@ -10,3 +16,6 @@ notifications:
       - team846:C7msa8tAKGdHScWVPPVL3DnB
     on_success: change
     on_failure: always
+branches:
+  only:
+    - master

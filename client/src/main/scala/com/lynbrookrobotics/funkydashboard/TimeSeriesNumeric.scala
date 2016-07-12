@@ -1,64 +1,34 @@
 package com.lynbrookrobotics.funkydashboard
 
-import org.scalajs.dom._
-
 import scala.scalajs.js
-import org.scalajs.jquery._
-
-import com.lynbrookrobotics.flot.Flot._
+import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import japgolly.scalajs.react.vdom.all._
 
 trait TimeSeriesNumericProperties extends js.Object {
   val numberType: String = js.native
 }
 
-class TimeSeriesNumeric(name: String, properties: TimeSeriesNumericProperties) extends Dataset[String](name) {
-  val textDisplay = document.createElement("h4").asInstanceOf[html.Heading]
-  textDisplay.style.textAlign = "center"
+object TimeSeriesNumeric {
+  case class Props(properties: TimeSeriesNumericProperties, newPoints: List[String])
 
-  val chartHolder = document.createElement("div").asInstanceOf[html.Div]
-  chartHolder.style.height = "300px"
-  chartHolder.style.width = "100%"
+  class Backend($: BackendScope[Props, Unit]) {
+    def render(props: Props) = {
+      import props._
 
-  override val dataDisplay: html.Element = document.createElement("div").asInstanceOf[html.Div]
-  dataDisplay.appendChild(textDisplay)
-  dataDisplay.appendChild(chartHolder)
+      val newValues = newPoints.map(_.toDouble)
 
-  var currentData = js.Array[js.Array[Double]]()
-  var nextIndex = 0
-
-  override def updateDisplay(newData: String): Unit = {
-    val parsedDisplay: Number = properties.numberType match {
-      case "byte" => newData.toByte
-      case "double" => newData.toDouble
-      case "float" => newData.toFloat
-      case "integer" => newData.toInt
-      case "long" => newData.toLong
-      case "short" => newData.toShort
-    }
-
-    if (currentData.length == 50) {
-      currentData.shift()
-    }
-
-    currentData.push(js.Array(nextIndex, parsedDisplay.doubleValue()))
-    nextIndex += 1
-
-    jQuery.plot(
-      chartHolder,
-      js.Array(
-        js.Dynamic.literal(
-          data = currentData,
-          lines = js.Dynamic.literal(
-            show = true,
-            fill = true
-          )
-        )
+      div(
+        FlotLineChart(newValues)
       )
-    )
+    }
+  }
 
-    textDisplay.innerHTML =
-      if (Seq("byte", "integer", "long", "short").contains(properties.numberType))
-        parsedDisplay.longValue().toString
-      else f"${parsedDisplay.doubleValue()}%.2f"
+  val component = ReactComponentB[Props](getClass.getSimpleName)
+    .stateless
+    .renderBackend[Backend]
+    .build
+
+  def apply(properties: TimeSeriesNumericProperties, newPoints: List[String]) = {
+    component(Props(properties, newPoints))
   }
 }
