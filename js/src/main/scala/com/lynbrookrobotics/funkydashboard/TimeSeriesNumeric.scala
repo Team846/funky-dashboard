@@ -14,6 +14,9 @@ object TimeSeriesNumeric {
       val newValues = newPoints.map(t => (t._1, t._2.value))
 
       div(
+        if (newValues.nonEmpty) {
+          h3(textAlign := "center")(newValues.last._2)
+        } else EmptyTag,
         FlotLineChart(newValues)
       )
     }
