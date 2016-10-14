@@ -15,7 +15,7 @@ lazy val dashboard = crossProject.in(file(".")).
     name := "funky-dashboard",
     version := "0.2.0-SNAPSHOT",
     scalaVersion := "2.11.8",
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.3.9"
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.4.1"
   )
 
 lazy val dashboardJS = dashboard.js.settings(
