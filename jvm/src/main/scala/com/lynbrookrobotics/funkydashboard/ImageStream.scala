@@ -7,7 +7,7 @@ import javax.imageio.ImageIO
 
 class ImageStream(name: String)(value: => BufferedImage) extends Dataset[ImageStreamValue] {
   override val definition: DatasetDefinition =
-    DatasetDefinition("", "image-stream")
+    DatasetDefinition(name, "image-stream")
 
   override def currentValue: ImageStreamValue = {
     val baos = new ByteArrayOutputStream()
