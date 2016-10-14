@@ -48,9 +48,3 @@ lazy val dashboardJVM = dashboard.jvm.settings(
   publishMavenStyle := true,
   publishTo := Some(Resolver.file("gh-pages-repo", baseDirectory.value / ".." / "repo"))
 )
-
-// Disabled for later rewrite
-// lazy val blackbox = project.dependsOn(server).settings(
-//   publish := {},
-//   publishLocal := {}
-// )
