@@ -12,7 +12,7 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 import upickle.default._
 
-object FunkyDashboard {
+class FunkyDashboard {
   private val datasetGroups = mutable.Map[String, DatasetGroup]()
 
   val startTime = System.currentTimeMillis()

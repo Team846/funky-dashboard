@@ -13,7 +13,9 @@ object Main extends App {
   implicit val executionContext = system.dispatcher
   implicit val routingSettings = RoutingSettings.default
 
-  Http().bindAndHandle(Route.handlerFlow(FunkyDashboard.route), "0.0.0.0", 8080)
+  val dashboard = new FunkyDashboard
 
-  FunkyDashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
+  Http().bindAndHandle(Route.handlerFlow(dashboard.route), "0.0.0.0", 8080)
+
+  dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
 }
