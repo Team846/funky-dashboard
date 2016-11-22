@@ -6,6 +6,10 @@ before_script:
   - cd scalajs-react-mdl
   - sbt publishLocal
   - cd ../funky-dashboard
+addons:
+  apt:
+    packages:
+    - nodejs
 script:
   - sbt compile
 after_success:

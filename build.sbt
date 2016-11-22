@@ -27,14 +27,13 @@ lazy val dashboardJS = dashboard.js.settings(
 )
 
 val sjsFiles = Def.taskDyn {
-  (fullOptJS in (dashboardJS, Compile)).map { _ =>
+  ((webpack in fullOptJS) in (dashboardJS, Compile)).map { _ =>
     val root = (crossTarget in dashboardJS).value / "server-resources" / "META-INF" / "resources"
     Seq(
       root,
       root / "sjs",
-      root / "sjs" / "funky-dashboard-opt.js",
-      root / "sjs" / "funky-dashboard-jsdeps.min.js",
-      root / "sjs" / "funky-dashboard-launcher.js"
+      root / "sjs" / "funky-dashboard-opt-bundle.js",
+      root / "sjs" / "launcher.js"
     )
   }
 }

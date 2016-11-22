@@ -4,7 +4,6 @@ import com.lynbrookrobotics.chartjs.Chart
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
 import japgolly.scalajs.react.vdom.all._
 import org.scalajs.dom.{CanvasRenderingContext2D, html}
-import org.scalajs.jquery.jQuery
 
 import scala.scalajs.js
 import js.JSConverters._
@@ -42,25 +41,28 @@ object LineChart {
         )
       )
 
+      drawChart(chart)
+
       $.setState(Some(chart))
+    }
+
+    def drawChart(c: Chart): Unit = {
+      val newPoints = $.props.runNow().newPoints
+      val newData = newPoints.map { p =>
+        js.Dynamic.literal(
+          "x" -> p._1,
+          "y" -> p._2
+        )
+      }
+
+      c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data = newData.toJSArray
+
+      c.update()
     }
 
     def onUpdate = Callback {
       $.state.runNow().foreach { c =>
-        println(c)
-        val data = c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data.asInstanceOf[js.Array[js.Dynamic]]
-
-        val newPoints = $.props.runNow().newPoints
-        val newData = newPoints.map { p =>
-          js.Dynamic.literal(
-            "x" -> p._1,
-            "y" -> p._2
-          )
-        }
-
-        c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data = newData.toJSArray
-
-        c.update()
+        drawChart(c)
       }
     }
 
