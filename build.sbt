@@ -19,7 +19,7 @@ lazy val dashboard = crossProject.in(file(".")).
   )
 
 lazy val dashboardJS = dashboard.js.settings(
-  Seq(packageScalaJSLauncher, fastOptJS, fullOptJS, packageJSDependencies, packageMinifiedJSDependencies) map { packageJSKey =>
+  Seq(packageScalaJSLauncher, fullOptJS, packageMinifiedJSDependencies) map { packageJSKey =>
     crossTarget in (Compile, packageJSKey) := crossTarget.value / "server-resources" / "META-INF" / "resources"/ "sjs"
   },
   publish := {},
@@ -27,13 +27,12 @@ lazy val dashboardJS = dashboard.js.settings(
 )
 
 val sjsFiles = Def.taskDyn {
-  (fastOptJS in (dashboardJS, Compile)).map { _ =>
+  (fullOptJS in (dashboardJS, Compile)).map { _ =>
     val root = (crossTarget in dashboardJS).value / "server-resources" / "META-INF" / "resources"
     Seq(
       root,
       root / "sjs",
-      root / "sjs" / "funky-dashboard-fastopt.js",
-      root / "sjs" / "funky-dashboard-jsdeps.js",
+      root / "sjs" / "funky-dashboard-opt.js",
       root / "sjs" / "funky-dashboard-jsdeps.min.js",
       root / "sjs" / "funky-dashboard-launcher.js"
     )
