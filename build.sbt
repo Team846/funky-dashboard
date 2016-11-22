@@ -2,6 +2,8 @@ organization := "com.lynbrookrobotics"
 
 name := "funky-dashboard"
 
+scalaVersion in ThisBuild := "2.11.8"
+
 lazy val dashboardRoot = project.in(file(".")).
   aggregate(dashboardJS, dashboardJVM).
   settings(
@@ -14,7 +16,6 @@ lazy val dashboard = crossProject.in(file(".")).
     organization := "com.lynbrookrobotics",
     name := "funky-dashboard",
     version := "0.2.0-SNAPSHOT",
-    scalaVersion := "2.11.8",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.4.1"
   )
 
