@@ -18,7 +18,7 @@ class FunkyDashboard {
   val startTime = System.currentTimeMillis()
 
   val source = Source.tick(0 millis, 125 millis, ()).map { _ =>
-    val time = (System.currentTimeMillis() - startTime).toDouble / 1000
+    val time = System.currentTimeMillis()
     val toSend = (time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))
     TextMessage(write(toSend))
   }

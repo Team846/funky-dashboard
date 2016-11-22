@@ -18,4 +18,8 @@ object Main extends App {
   Http().bindAndHandle(Route.handlerFlow(dashboard.route), "0.0.0.0", 8080)
 
   dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
+
+  readLine()
+
+  system.shutdown()
 }
