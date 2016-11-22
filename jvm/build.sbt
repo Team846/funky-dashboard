@@ -1,6 +1,8 @@
-libraryDependencies += "com.typesafe.akka" %% "akka-http-experimental" % "2.0-M1"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.14"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.3.12"
+libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.0.0"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.4.14"
 
 libraryDependencies += "org.webjars" % "material-design-icons" % "3.0.1"
 

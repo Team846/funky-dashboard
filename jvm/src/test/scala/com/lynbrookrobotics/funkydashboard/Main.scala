@@ -1,11 +1,12 @@
 package com.lynbrookrobotics.funkydashboard
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Route, RoutingSettings}
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.settings.RoutingSettings
+
+import scala.io.StdIn
 
 object Main extends App {
   implicit val system = ActorSystem("funky-dashboard")
@@ -20,7 +21,7 @@ object Main extends App {
   dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
   dashboard.datasetGroup("test2").addDataset(new TimeSeriesNumeric("randomer")(math.random))
 
-  readLine()
+  StdIn.readLine()
 
-  system.shutdown()
+  system.terminate()
 }

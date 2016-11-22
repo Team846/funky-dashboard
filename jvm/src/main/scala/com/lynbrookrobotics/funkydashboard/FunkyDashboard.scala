@@ -1,16 +1,15 @@
 package com.lynbrookrobotics.funkydashboard
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.ws.{TextMessage, UpgradeToWebsocket}
-import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.ws.{TextMessage, UpgradeToWebSocket}
+import akka.http.scaladsl.server.Directives._
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 import upickle.default._
+
+import scala.language.postfixOps
 
 class FunkyDashboard {
   private val datasetGroups = mutable.Map[String, DatasetGroup]()
@@ -31,12 +30,20 @@ class FunkyDashboard {
     } ~
     path("datasets.json") {
       complete(HttpResponse(
-        entity = HttpEntity(ContentTypes.`application/json`, write(datasetGroups.values.toVector.map(_.properties)))
+        entity = HttpEntity(
+          ContentTypes.`application/json`,
+          write(datasetGroups.values.toVector.map(_.properties))
+        )
       ))
     } ~ path("datastream") {
-      optionalHeaderValueByType[UpgradeToWebsocket](()) {
-        case Some(header) => complete(header.handleMessagesWithSinkSource(Sink.ignore, source))
-        case None => complete(HttpResponse(status = StatusCodes.BadRequest, entity = "Expected websocket request"))
+      optionalHeaderValueByType[UpgradeToWebSocket](()) {
+        case Some(header) =>
+          complete(header.handleMessagesWithSinkSource(Sink.ignore, source))
+        case None =>
+          complete(HttpResponse(
+            status = StatusCodes.BadRequest,
+            entity = "Expected websocket request"
+          ))
       }
     }
   }
