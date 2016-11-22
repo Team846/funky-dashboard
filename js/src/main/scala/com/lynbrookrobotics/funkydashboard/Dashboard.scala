@@ -69,7 +69,8 @@ object Dashboard {
             div(className := "mdl-layout-spacer"),
             button(
               id := "pause-button",
-              className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+              className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
+              onClick --> $.modState(s => s.copy(_1 = !s._1))
             )("Toggle Pause").material
           )
         ),
@@ -113,6 +114,7 @@ object Dashboard {
     .initialState((false, 0, List.empty[(Double, Map[String, Map[String, String]])]))
     .renderBackend[Backend]
     .componentDidMount(_.backend.componentDidMount)
+    .shouldComponentUpdate(b => !b.$.state._1 || b.nextState._2 != b.$.state._2)
     .build
 
   def apply(groups: Vector[DatasetGroupDefinition]) =
