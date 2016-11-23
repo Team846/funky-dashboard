@@ -6,10 +6,9 @@ import japgolly.scalajs.react.vdom.all._
 import org.scalajs.dom.{CanvasRenderingContext2D, html}
 
 import scala.scalajs.js
-import js.JSConverters._
 
-object LineChart {
-  case class Props(newPoints: List[(Double, Double)])
+object SlidingLineChart {
+  case class Props(points: List[(Double, Double)])
 
   class Backend($: BackendScope[Props, Option[Chart]]) {
     def onMount = {
@@ -33,7 +32,6 @@ object LineChart {
                 )
               )
             ),
-            "animation" -> false,
             "legend" -> js.Dynamic.literal(
               "display" -> false
             )
@@ -46,18 +44,35 @@ object LineChart {
       $.setState(Some(chart))
     }
 
+    var lastPoints = List.empty[(Double, Double)]
+
     def drawChart(c: Chart): Unit = {
-      val newPoints = $.props.runNow().newPoints
-      val newData = newPoints.map { p =>
-        js.Dynamic.literal(
-          "x" -> p._1,
-          "y" -> p._2
-        )
+      val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last._1
+
+      val points = $.props.runNow().points
+
+      if (points.nonEmpty) {
+        val newPoints = points.dropWhile(_._1 <= lastTimeStamp)
+
+        val numRemoved = if (newPoints.nonEmpty) lastPoints.takeWhile(_._1 < points.head._1).size else 0
+
+        lastPoints = points
+
+        val data = c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data.asInstanceOf[js.Array[js.Dynamic]]
+
+        newPoints.foreach { p =>
+          data.push(js.Dynamic.literal(
+            "x" -> p._1,
+            "y" -> p._2
+          ))
+        }
+
+        (1 to numRemoved).foreach { i =>
+          data.shift()
+        }
+
+        c.update()
       }
-
-      c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data = newData.toJSArray
-
-      c.update()
     }
 
     def onUpdate = Callback {
@@ -66,10 +81,7 @@ object LineChart {
       }
     }
 
-    def render(props: Props) = {
-      // 16:9 aspect ratio assuming width of 576px (on full-screen Retina MBP)
-      canvas(ref := "chart-container")
-    }
+    def render(props: Props) = canvas(ref := "chart-container")
   }
 
   val component = ReactComponentB[Props](getClass.getSimpleName)

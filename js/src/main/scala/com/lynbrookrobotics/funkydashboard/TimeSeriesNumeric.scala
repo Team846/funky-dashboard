@@ -17,7 +17,7 @@ object TimeSeriesNumeric {
         if (newValues.nonEmpty) {
           h3(textAlign := "center")(newValues.last._2)
         } else EmptyTag,
-        LineChart(newValues)
+        SlidingLineChart(newValues)
       )
     }
   }
