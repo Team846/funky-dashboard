@@ -28,6 +28,11 @@ object SlidingLineChart {
               "xAxes" -> js.Array(
                 js.Dynamic.literal(
                   "type" -> "time",
+                  "time" -> js.Dynamic.literal(
+                    "unitStepSize" -> 1000,
+                    "unit" -> "millisecond",
+                    "tooltipFormat" -> "SSS [ms]"
+                  ),
                   "position" -> "bottom"
                 )
               )
