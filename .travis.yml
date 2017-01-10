@@ -4,7 +4,7 @@ before_script:
   - cd ..
   - git clone https://github.com/payalabs/scalajs-react-mdl.git
   - cd scalajs-react-mdl
-  - sbt publishLocal
+  - sbt +publishLocal
   - cd ../funky-dashboard
 addons:
   apt:
