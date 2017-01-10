@@ -1,6 +1,6 @@
 enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
 
-libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
+libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 
 libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "0.11.3"
 
