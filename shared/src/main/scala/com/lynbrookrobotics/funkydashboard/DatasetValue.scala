@@ -7,3 +7,5 @@ case class TimeSeriesValue(value: Double)
 case class TimeSnapshotValue(value: Option[Double])
 
 case class ImageStreamValue(value: String)
+
+case class TimeTableValue(key: String, value: String)
