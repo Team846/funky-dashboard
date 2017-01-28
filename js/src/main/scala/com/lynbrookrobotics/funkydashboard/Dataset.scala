@@ -10,6 +10,10 @@ object Dataset {
         values => TimeSeriesNumeric(
           values.map(v => (v._1, read[TimeSeriesValue](v._2)))
         )
+      case DatasetDefinition(_, "time-snapshot") =>
+        values => TimeSnapshotNumeric(
+          values.map(v => (v._1, read[TimeSnapshotValue](v._2)))
+        )
       case DatasetDefinition(_, "image-stream") =>
         values => ImageStream(
           values.map(v => read[ImageStreamValue](v._2))

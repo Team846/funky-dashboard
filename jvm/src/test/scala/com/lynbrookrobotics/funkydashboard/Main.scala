@@ -20,7 +20,11 @@ object Main extends App {
 
   dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
   dashboard.datasetGroup("test2").addDataset(new TimeSeriesNumeric("randomer")(math.random))
-
+  dashboard.datasetGroup("TestSnapshot").addDataset(new TimeSnapshotNumeric("randomers") ({
+    if (math.random < 0.05) None else {
+      Some(math.random)
+    }
+  }))
   StdIn.readLine()
 
   system.terminate()
