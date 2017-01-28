@@ -25,6 +25,10 @@ object Dataset {
         values => ImageStream(
           values.map(v => read[ImageStreamValue](v._2))
         )
+      case DatasetDefinition(_, "time-text") =>
+        values => TimeTextNumeric(
+          values.map(v => (v._1, read[TimeTextValue](v._2)))
+        )
     }
   }
 }

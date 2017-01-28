@@ -21,10 +21,14 @@ object Main extends App {
   dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
   dashboard.datasetGroup("test2").addDataset(new TimeSeriesNumeric("randomer")(math.random))
 
+  dashboard.datasetGroup("testText").addDataset(new TimeTextNumeric("randomers")(math.random, {
+    if (math.random < 0.2) Some("other message")
+    else Some("message")
+  }))
+
   dashboard.datasetGroup("testTable").addDataset(new TimeSeriesTable("randomers")(
     List.tabulate((math.random * 10).toInt)(i => (math.random.toString, math.random.toString))
   ))
-
 
   dashboard.datasetGroup("TestSnapshot").addDataset(new TimeSnapshotNumeric("randomers") ({
     if (math.random < 0.05) None else {
