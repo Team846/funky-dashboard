@@ -4,8 +4,6 @@ name := "funky-dashboard"
 
 scalaVersion in ThisBuild := "2.12.1"
 
-crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
-
 lazy val dashboardRoot = project.in(file(".")).
   aggregate(dashboardJS, dashboardJVM).
   settings(
@@ -22,7 +20,7 @@ lazy val dashboard = crossProject.in(file(".")).
   )
 
 lazy val dashboardJS = dashboard.js.settings(
-  Seq(packageScalaJSLauncher, fullOptJS, packageMinifiedJSDependencies) map { packageJSKey =>
+  Seq(fullOptJS) map { packageJSKey =>
     crossTarget in (Compile, packageJSKey) := crossTarget.value / "server-resources" / "META-INF" / "resources"/ "sjs"
   },
   publish := {},
@@ -35,8 +33,7 @@ val sjsFiles = Def.taskDyn {
     Seq(
       root,
       root / "sjs",
-      root / "sjs" / "funky-dashboard-opt-bundle.js",
-      root / "sjs" / "launcher.js"
+      root / "sjs" / "funky-dashboard-opt-bundle.js"
     )
   }
 }

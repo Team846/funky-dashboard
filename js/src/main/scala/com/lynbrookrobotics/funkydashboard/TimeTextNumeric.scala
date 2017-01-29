@@ -10,16 +10,12 @@ object TimeTextNumeric {
     def render(props: Props) = {
       import props._
 
-      val newValues = newPoints.map(t => (t._1, t._2.value))
-
       div(
-        if (newValues.nonEmpty) {
+        if (newPoints.nonEmpty) {
           div(
-            h3(textAlign := "center")(newValues.last._2))
-          div(h3(textAlign := "center")(newPoints.last._2.message)
+            p(newPoints.last._2.message)
           )
-        } else EmptyTag,
-        SlidingLineChart(newValues)
+        } else EmptyTag
       )
     }
   }
