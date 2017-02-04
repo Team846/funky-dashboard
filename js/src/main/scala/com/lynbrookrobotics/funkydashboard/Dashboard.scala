@@ -3,12 +3,13 @@ package com.lynbrookrobotics.funkydashboard
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
 import org.scalajs.dom.ext.Ajax
-
 import com.payalabs.scalajs.react.mdl._
 import org.scalajs.dom._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import upickle.default._
+
+import scala.collection.immutable.Queue
 
 object DashboardContainer {
   class Backend($: BackendScope[Unit, Vector[DatasetGroupDefinition]]) {
@@ -38,8 +39,9 @@ object DashboardContainer {
 
 object Dashboard {
   case class Props(groups: Vector[DatasetGroupDefinition])
+  case class State(postToServer: String => Unit, paused: Boolean, activeGroupIndex: Int, pointsWindow: Queue[(Double, Map[String, Map[String, String]])])
 
-  class Backend($: BackendScope[Props, (Boolean, Int, List[(Double, Map[String, Map[String, String]])])]) {
+  class Backend($: BackendScope[Props, State]) {
     val websocketProtocol = if (window.location.protocol == "https") {
       "wss"
     } else {
@@ -48,19 +50,28 @@ object Dashboard {
 
     def componentDidMount: Callback = Callback {
       val datastream = new WebSocket(s"$websocketProtocol://${window.location.host}/datastream")
+
+      $.modState { state =>
+        state.copy(
+          postToServer = s => {
+            println(s"posting $s")
+            datastream.send(s)
+          }
+        )
+      }.runNow()
+
       datastream.onmessage = (e: MessageEvent) => {
         val newValues = read[(Double, Map[String, Map[String, String]])](e.data.toString)
         $.modState { state =>
           state.copy(
-            _3 = (state._3 :+ newValues).takeRight(50)
+            pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
           )
         }.runNow()
       }
     }
 
-    def render(props: Props, state: (Boolean, Int, List[(Double, Map[String, Map[String, String]])])) = {
-      import props._
-      val (paused, activeGroupIndex, pointsWindow) = state
+    def render(props: Props, state: State) = {
+      import props._, state._
 
       div(className := "mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header")(
         header(className := "mdl-layout__header")(
@@ -70,7 +81,7 @@ object Dashboard {
             button(
               id := "pause-button",
               className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
-              onClick --> $.modState(s => s.copy(_1 = !s._1))
+              onClick --> $.modState(s => s.copy(paused = !s.paused))
             )("Toggle Pause").material
           )
         ),
@@ -84,7 +95,7 @@ object Dashboard {
                 className := "mdl-navigation__link",
                 backgroundColor := (if (index == activeGroupIndex) "#00ACC1" else "transparent"),
                 cursor := "pointer",
-                onClick --> $.modState(_.copy(_2 = index))
+                onClick --> $.modState(_.copy(activeGroupIndex = index))
               )(group.name)
             }
           )
@@ -96,7 +107,7 @@ object Dashboard {
               group.datasets.map { d =>
                 DatasetCard(
                   d.name,
-                  Dataset.extract(d)(pointsWindow.flatMap { case (timestamp, updates) =>
+                  Dataset.extract(d, s => postToServer(write((group.name, d.name, s))))(pointsWindow.flatMap { case (timestamp, updates) =>
                     updates.get(group.name).flatMap(_.get(d.name)).map(v => (timestamp, v))
                   })
                 )
@@ -111,10 +122,10 @@ object Dashboard {
   }
 
   val component = ReactComponentB[Props](getClass.getSimpleName)
-    .initialState((false, 0, List.empty[(Double, Map[String, Map[String, String]])]))
+    .initialState(State(s => (), false, 0, Queue.empty[(Double, Map[String, Map[String, String]])]))
     .renderBackend[Backend]
     .componentDidMount(_.backend.componentDidMount)
-    .shouldComponentUpdate(b => !b.$.state._1 || b.nextState._2 != b.$.state._2)
+    .shouldComponentUpdate(b => !b.$.state.paused || b.nextState.activeGroupIndex != b.$.state.activeGroupIndex)
     .build
 
   def apply(groups: Vector[DatasetGroupDefinition]) =

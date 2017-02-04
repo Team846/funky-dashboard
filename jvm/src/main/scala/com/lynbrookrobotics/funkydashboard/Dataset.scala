@@ -7,6 +7,10 @@ abstract class Dataset[T](implicit valueWriter: Writer[T]) {
 
   def currentValue: T
 
+  def handleIncomingData(data: String): Unit = {
+    println(s"Unhandled incoming data: $data")
+  }
+
   def currentValueJSON: String = {
     write(currentValue)
   }

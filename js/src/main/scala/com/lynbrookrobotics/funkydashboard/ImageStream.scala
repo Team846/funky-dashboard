@@ -3,8 +3,10 @@ package com.lynbrookrobotics.funkydashboard
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, ReactComponentU, TopNode}
 import japgolly.scalajs.react.vdom.all._
 
+import scala.collection.immutable.Queue
+
 object ImageStream {
-  case class Props(newPoints: List[ImageStreamValue])
+  case class Props(newPoints: Queue[ImageStreamValue])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -23,7 +25,7 @@ object ImageStream {
     .shouldComponentUpdate(_.nextProps.newPoints.nonEmpty)
     .build
 
-  def apply(newPoints: List[ImageStreamValue]) = {
+  def apply(newPoints: Queue[ImageStreamValue]) = {
     component(Props(newPoints))
   }
 }

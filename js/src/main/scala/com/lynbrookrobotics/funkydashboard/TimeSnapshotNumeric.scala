@@ -3,8 +3,10 @@ package com.lynbrookrobotics.funkydashboard
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
+import scala.collection.immutable.Queue
+
 object TimeSnapshotNumeric {
-  case class Props(newPoints: List[(Double, TimeSnapshotValue)])
+  case class Props(newPoints: Queue[(Double, TimeSnapshotValue)])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -27,7 +29,7 @@ object TimeSnapshotNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: List[(Double, TimeSnapshotValue)]) = {
+  def apply(newPoints: Queue[(Double, TimeSnapshotValue)]) = {
     val reverseList = newPoints.reverse.dropWhile(_._2.value.isEmpty)
     val newList = reverseList.takeWhile(_._2.value.isDefined)
     component(Props(newList.reverse))

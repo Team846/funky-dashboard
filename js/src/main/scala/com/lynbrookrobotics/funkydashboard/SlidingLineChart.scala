@@ -5,10 +5,11 @@ import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
 import japgolly.scalajs.react.vdom.all._
 import org.scalajs.dom.{CanvasRenderingContext2D, html}
 
+import scala.collection.immutable.Queue
 import scala.scalajs.js
 
 object SlidingLineChart {
-  case class Props(points: List[(Double, Double)])
+  case class Props(points: Queue[(Double, Double)])
 
   class Backend($: BackendScope[Props, Option[Chart]]) {
     def onMount = {
@@ -49,7 +50,7 @@ object SlidingLineChart {
       $.setState(Some(chart))
     }
 
-    var lastPoints = List.empty[(Double, Double)]
+    var lastPoints = Queue.empty[(Double, Double)]
 
     def drawChart(c: Chart): Unit = {
       val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last._1
@@ -97,7 +98,7 @@ object SlidingLineChart {
     .componentWillReceiveProps(_.component.backend.onUpdate)
     .build
 
-  def apply(newPoints: List[(Double, Double)]) = {
+  def apply(newPoints: Queue[(Double, Double)]) = {
     component(Props(newPoints))
   }
 }

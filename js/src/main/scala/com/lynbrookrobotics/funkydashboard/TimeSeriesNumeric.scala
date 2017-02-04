@@ -4,8 +4,10 @@ import scala.scalajs.js
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.all._
 
+import scala.collection.immutable.Queue
+
 object TimeSeriesNumeric {
-  case class Props(newPoints: List[(Double, TimeSeriesValue)])
+  case class Props(newPoints: Queue[(Double, TimeSeriesValue)])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -27,7 +29,7 @@ object TimeSeriesNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: List[(Double, TimeSeriesValue)]) = {
+  def apply(newPoints: Queue[(Double, TimeSeriesValue)]) = {
     component(Props(newPoints))
   }
 }

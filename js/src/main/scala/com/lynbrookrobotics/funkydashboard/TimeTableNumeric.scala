@@ -3,8 +3,10 @@ package com.lynbrookrobotics.funkydashboard
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
+import scala.collection.immutable.Queue
+
 object TimeTableNumeric {
-  case class Props(newPoints: List[(Double, List[TimeTableValue])])
+  case class Props(newPoints: Queue[(Double, List[TimeTableValue])])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -31,7 +33,7 @@ object TimeTableNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: List[(Double, List[TimeTableValue])]) = {
+  def apply(newPoints: Queue[(Double, List[TimeTableValue])]) = {
     component(Props(newPoints))
   }
 

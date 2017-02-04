@@ -2,8 +2,9 @@ package com.lynbrookrobotics.funkydashboard
 
 import akka.stream.scaladsl.{Sink, Source}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.ws.{TextMessage, UpgradeToWebSocket}
+import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -22,7 +23,18 @@ class FunkyDashboard {
     TextMessage(write(toSend))
   }
 
-  val route = get {
+  private val sink = Sink.foreach[Message] {
+    case t: TextMessage =>
+      val (groupName, datasetName, value) = read[(String, String, String)](t.getStrictText)
+      datasetGroups.get(groupName).foreach { g =>
+        g.dataset(datasetName).foreach { d =>
+          d.handleIncomingData(value)
+        }
+      }
+    case _ =>
+  }
+
+  val route: Route = get {
     pathSingleSlash {
       getFromResource("META-INF/resources/index.html")
     } ~ pathPrefix("") {

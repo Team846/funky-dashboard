@@ -7,6 +7,7 @@ class DatasetGroup(name: String) {
 
   def properties = DatasetGroupDefinition(name, datasets.map(d => write(d.definition)))
   def currentValue: Map[String, String] = datasets.map(d => d.definition.name -> d.currentValueJSON).toMap
+  def dataset(name: String): Option[Dataset[_]] = datasets.find(_.definition.name == name)
 
   def addDataset(dataset: Dataset[_]): Unit = {
     datasets = datasets :+ dataset

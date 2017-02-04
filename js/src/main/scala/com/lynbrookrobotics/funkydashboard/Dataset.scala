@@ -3,8 +3,10 @@ package com.lynbrookrobotics.funkydashboard
 import japgolly.scalajs.react.{ReactComponentU, TopNode}
 import upickle.default._
 
+import scala.collection.immutable.Queue
+
 object Dataset {
-  def extract(definition: DatasetDefinition): List[(Double, String)] => ReactComponentU[_, _, _, TopNode] = {
+  def extract(definition: DatasetDefinition, sendData: String => Unit): Queue[(Double, String)] => ReactComponentU[_, _, _, TopNode] = {
     definition match {
       case DatasetDefinition(_, "time-series-numeric") =>
         values => TimeSeriesNumeric(
@@ -25,9 +27,16 @@ object Dataset {
         values => ImageStream(
           values.map(v => read[ImageStreamValue](v._2))
         )
+
       case DatasetDefinition(_, "time-text") =>
         values => TimeTextNumeric(
           values.map(v => (v._1, read[TimeTextValue](v._2)))
+        )
+
+      case DatasetDefinition(_, "json-editor") => values =>
+        JsonEditorDataset(
+          values.map(v => (v._1, read[JsonEditorValue](v._2))),
+          sendData
         )
     }
   }

@@ -20,7 +20,7 @@ lazy val dashboard = crossProject.in(file(".")).
   )
 
 lazy val dashboardJS = dashboard.js.settings(
-  Seq(fullOptJS) map { packageJSKey =>
+  Seq(npmUpdate in fullOptJS) map { packageJSKey =>
     crossTarget in (Compile, packageJSKey) := crossTarget.value / "server-resources" / "META-INF" / "resources"/ "sjs"
   },
   publish := {},

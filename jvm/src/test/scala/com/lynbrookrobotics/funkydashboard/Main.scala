@@ -36,6 +36,16 @@ object Main extends App {
     }
   }))
 
+  var currentJSON = """{ "hello": "hi" }"""
+
+  dashboard.datasetGroup("JsonEditor").addDataset(new JsonEditor("jsonvalue") (
+    currentJSON,
+    s => {
+      currentJSON = s
+      println(s"updated json, new value: $s")
+    }
+  ))
+
   StdIn.readLine()
 
   system.terminate()
