@@ -27,12 +27,17 @@ object JsonEditorDataset {
                 "object" -> js.Dynamic.literal(
                   "display" -> "inline"
                 ),
+                "array" -> js.Dynamic.literal(
+                  "display" -> "inline"
+                ),
                 "object-row" -> js.Dynamic.literal(
                   "marginLeft" -> 15
                 ),
-                "add-button" -> js.Dynamic.literal(
-                  "display" -> "block",
+                "array-row" -> js.Dynamic.literal(
                   "marginLeft" -> 15
+                ),
+                "add-button" -> js.Dynamic.literal(
+                  "display" -> "none"
                 ),
                 "add-group" -> js.Dynamic.literal(
                   "marginLeft" -> 15

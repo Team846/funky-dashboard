@@ -50,7 +50,7 @@ class FunkyDashboard {
     } ~ path("datastream") {
       optionalHeaderValueByType[UpgradeToWebSocket](()) {
         case Some(header) =>
-          complete(header.handleMessagesWithSinkSource(Sink.ignore, source))
+          complete(header.handleMessagesWithSinkSource(sink, source))
         case None =>
           complete(HttpResponse(
             status = StatusCodes.BadRequest,
