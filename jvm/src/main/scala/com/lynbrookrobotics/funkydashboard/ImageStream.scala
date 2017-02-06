@@ -13,7 +13,7 @@ class ImageStream(name: String)(value: => BufferedImage) extends Dataset[ImageSt
     val baos = new ByteArrayOutputStream()
 
     try {
-      ImageIO.write(value, "png", baos)
+      ImageIO.write(value, "jpeg", baos)
       baos.flush()
       ImageStreamValue(Base64.getEncoder.encodeToString(baos.toByteArray))
     } catch {

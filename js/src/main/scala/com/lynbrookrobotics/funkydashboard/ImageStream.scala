@@ -14,7 +14,7 @@ object ImageStream {
       val last = if (images.nonEmpty) images.last.value else ""
 
       div(
-        img(src := s"data:image/png;base64,$last")
+        img(width := "100%")(src := s"data:image/jpg;base64,$last")
       )
     }
   }
