@@ -13,6 +13,11 @@ object Dataset {
           values.map(v => (v._1, read[TimeSeriesValue](v._2)))
         )
 
+      case DatasetDefinition(_, "time-multiple-dataset") =>
+        values => MultipleTimeSeriesNumeric(
+          values.map(v => (v._1, read[TimeSeriesListValue](v._2)))
+        )
+
       case DatasetDefinition(_, "time-series-table") =>
         values => TimeTableNumeric(
           values.map(v => (v._1, read[List[TimeTableValue]](v._2)))

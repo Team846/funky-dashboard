@@ -18,19 +18,22 @@ object Main extends App {
 
   Http().bindAndHandle(Route.handlerFlow(dashboard.route), "0.0.0.0", 8080)
 
-  dashboard.datasetGroup("test").addDataset(new TimeSeriesNumeric("random")(math.random))
-  dashboard.datasetGroup("test2").addDataset(new TimeSeriesNumeric("randomer")(math.random))
+  dashboard.datasetGroup("Basic Test").addDataset(new TimeSeriesNumeric("Basic Test")(math.random))
 
-  dashboard.datasetGroup("testText").addDataset(new TimeTextNumeric("randomers")({
+  dashboard.datasetGroup("Text test").addDataset(new TimeTextNumeric("Text test")({
     if (math.random < 0.2) "other message"
     else "message"
   }))
 
-  dashboard.datasetGroup("testTable").addDataset(new TimeSeriesTable("randomers")(
+  dashboard.datasetGroup("Multiple List Test").addDataset(new TimeSeriesLists("Multiple Lists")(
+    List(math.random(),math.random())
+  ))
+
+  dashboard.datasetGroup("Table Test").addDataset(new TimeSeriesTable("Table Test")(
     List.tabulate((math.random * 10).toInt)(i => (math.random.toString, math.random.toString))
   ))
 
-  dashboard.datasetGroup("TestSnapshot").addDataset(new TimeSnapshotNumeric("randomers") ({
+  dashboard.datasetGroup("Snapshot Test").addDataset(new TimeSnapshotNumeric("Snapshot Test") ({
     if (math.random < 0.05) None else {
       Some(math.random)
     }

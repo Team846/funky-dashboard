@@ -13,3 +13,5 @@ case class TimeTableValue(key: String, value: String)
 case class TimeTextValue(message: String)
 
 case class JsonEditorValue(json: String)
+
+case class TimeSeriesListValue(value: List[Double])
