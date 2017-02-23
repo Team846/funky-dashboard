@@ -5,18 +5,15 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
 import scala.collection.immutable.Queue
 
-object MultipleTimeSeriesNumeric {
-  case class Props(newPoints: Queue[TimedValue[Seq[Double]]])
+object TimePushNumeric {
+  case class Props(newPoints: Queue[(Long, Seq[TimedValue[Double]])])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
       import props._
 
-      div(
-        if (newPoints.nonEmpty) {
-          h3(textAlign := "center")(newPoints.last.value.mkString(","))
-        } else EmptyTag,
-        MultipleSlidingLineChart(newPoints)
+      TimeSeriesNumeric(
+        newPoints.lastOption.map(l => l._2).getOrElse(Seq.empty)
       )
     }
   }
@@ -24,9 +21,10 @@ object MultipleTimeSeriesNumeric {
   val component = ReactComponentB[Props](getClass.getSimpleName)
     .stateless
     .renderBackend[Backend]
+    .shouldComponentUpdate(s => s.$.props != s.nextProps)
     .build
 
-  def apply(newPoints: Queue[TimedValue[Seq[Double]]]) = {
+  def apply(newPoints: Queue[(Long, Seq[TimedValue[Double]])]) = {
     component(Props(newPoints))
   }
 }

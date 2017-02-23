@@ -8,7 +8,7 @@ import scala.collection.immutable.Queue
 import scala.scalajs.js
 
 object MultipleSlidingLineChart {
-  case class Props(points: Queue[(Double, List[Double])])
+  case class Props(points: Seq[TimedValue[Seq[Double]]])
 
   class Backend($: BackendScope[Props, Option[Chart]]) {
     def onMount = {
@@ -45,7 +45,8 @@ object MultipleSlidingLineChart {
         "rgb(244, 66, 66)", "rgb(244, 223, 65)",
         "rgb(154, 244, 65)", "rgb(65, 244, 145)",
         "rgb(65, 244, 241)", "rgb(65, 88, 244)")
-      for ((_, i) <- $.props.runNow().points.last._2.zipWithIndex) {
+
+      for ((_, i) <- $.props.runNow().points.last.value.zipWithIndex) {
         data.push(js.Dynamic.literal(
           "label" -> s"Dataset $i",
           "borderColor" -> colorList(i),
@@ -59,17 +60,19 @@ object MultipleSlidingLineChart {
       $.setState(Some(chart))
     }
 
-    var lastPoints = Queue.empty[(Double, List[Double])]
+    var lastPoints = Seq.empty[TimedValue[Seq[Double]]]
 
     def drawChart(c: Chart): Unit = {
-      val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last._1
+      val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last.time
 
       val points = $.props.runNow().points
 
       if (points.nonEmpty) {
-        val newPoints = points.dropWhile(_._1 <= lastTimeStamp)
+        val newPoints = points.dropWhile(_.time <= lastTimeStamp)
 
-        val numRemoved = if (newPoints.nonEmpty) lastPoints.takeWhile(_._1 < points.head._1).size else 0
+        val numRemoved = if (newPoints.nonEmpty) {
+          lastPoints.view.takeWhile(_.time < points.head.time).size
+        } else 0
 
         lastPoints = points
 
@@ -78,8 +81,8 @@ object MultipleSlidingLineChart {
         newPoints.foreach { p =>
           for ((d, i) <- data.zipWithIndex) {
             d.push(js.Dynamic.literal(
-              "x" -> p._1,
-              "y" -> p._2(i)
+              "x" -> p.time,
+              "y" -> p.value(i)
             ))
           }
         }
@@ -104,12 +107,12 @@ object MultipleSlidingLineChart {
   val component = ReactComponentB[Props](getClass.getSimpleName)
     .initialState(None: Option[Chart])
     .renderBackend[Backend]
-    .shouldComponentUpdate(_ => false)
+    .shouldComponentUpdate(s => s.$.props != s.nextProps || s.$.state != s.nextState)
     .componentDidMount(_.backend.onMount)
-    .componentWillReceiveProps(_.component.backend.onUpdate)
+    .componentDidUpdate(_.component.backend.onUpdate)
     .build
 
-  def apply(newPoints: Queue[(Double, List[Double])]) = {
+  def apply(newPoints: Seq[TimedValue[Seq[Double]]]) = {
     component(Props(newPoints))
   }
 }

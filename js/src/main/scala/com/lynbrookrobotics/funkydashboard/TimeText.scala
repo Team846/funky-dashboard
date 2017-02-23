@@ -5,8 +5,8 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
 import scala.collection.immutable.Queue
 
-object TimeTextNumeric {
-  case class Props(newPoints: Queue[(Double, TimeTextValue)])
+object TimeText {
+  case class Props(newPoints: Queue[TimedValue[String]])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -15,7 +15,7 @@ object TimeTextNumeric {
       div(
         if (newPoints.nonEmpty) {
           div(
-            p(newPoints.last._2.message)
+            p(newPoints.last.value)
           )
         } else EmptyTag
       )
@@ -27,7 +27,7 @@ object TimeTextNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[(Double, TimeTextValue)]) = {
+  def apply(newPoints: Queue[TimedValue[String]]) = {
     component(Props(newPoints))
   }
 }

@@ -3,13 +3,14 @@ package com.lynbrookrobotics.funkydashboard
 import com.lynbrookrobotics.jsoneditor.JsonEditor
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import play.api.libs.json.JsValue
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 
 object JsonEditorDataset {
-  case class Props(newPoints: Queue[(Double, JsonEditorValue)], sendData: String => Unit)
+  case class Props(newPoints: Queue[TimedValue[String]], sendData: String => Unit)
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -19,7 +20,7 @@ object JsonEditorDataset {
         if (newPoints.nonEmpty) {
           div(margin := 10)(
             JsonEditor(
-              value = JSON.parse(newPoints.last._2.json),
+              value = JSON.parse(newPoints.last.value),
               propagateChanges = (d: js.Dynamic) => {
                 sendData(JSON.stringify(d))
               },
@@ -66,7 +67,7 @@ object JsonEditorDataset {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[(Double, JsonEditorValue)], sendData: String => Unit) = {
+  def apply(newPoints: Queue[TimedValue[String]], sendData: String => Unit) = {
     component(Props(newPoints, sendData))
   }
 }

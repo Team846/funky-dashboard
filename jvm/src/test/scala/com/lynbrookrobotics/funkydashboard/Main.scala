@@ -20,7 +20,7 @@ object Main extends App {
 
   dashboard.datasetGroup("Basic Test").addDataset(new TimeSeriesNumeric("Basic Test")(math.random))
 
-  dashboard.datasetGroup("Text test").addDataset(new TimeTextNumeric("Text test")({
+  dashboard.datasetGroup("Text test").addDataset(new TimeText("Text test")({
     if (math.random < 0.2) "other message"
     else "message"
   }))
@@ -29,7 +29,7 @@ object Main extends App {
     List(math.random(),math.random())
   ))
 
-  dashboard.datasetGroup("Table Test").addDataset(new TimeSeriesTable("Table Test")(
+  dashboard.datasetGroup("Table Test").addDataset(new TableDataset("Table Test")(
     List.tabulate((math.random * 10).toInt)(i => (math.random.toString, math.random.toString))
   ))
 
@@ -48,6 +48,16 @@ object Main extends App {
       println(s"updated json, new value: $s")
     }
   ))
+
+  val pushDataset = new TimePushNumeric("pushed")
+  dashboard.datasetGroup("push").addDataset(pushDataset)
+
+  new Thread(() => {
+    while (true) {
+      pushDataset.pushValue(math.random)
+      Thread.sleep(1000)
+    }
+  }).start()
 
   StdIn.readLine()
 

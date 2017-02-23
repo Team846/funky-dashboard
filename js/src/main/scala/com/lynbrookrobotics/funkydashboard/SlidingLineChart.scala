@@ -9,7 +9,7 @@ import scala.collection.immutable.Queue
 import scala.scalajs.js
 
 object SlidingLineChart {
-  case class Props(points: Queue[(Double, Double)])
+  case class Props(points: Seq[TimedValue[Double]])
 
   class Backend($: BackendScope[Props, Option[Chart]]) {
     def onMount = {
@@ -30,8 +30,6 @@ object SlidingLineChart {
                 js.Dynamic.literal(
                   "type" -> "time",
                   "time" -> js.Dynamic.literal(
-                    "unitStepSize" -> 1000,
-                    "unit" -> "millisecond",
                     "tooltipFormat" -> "SSS [ms]"
                   ),
                   "position" -> "bottom"
@@ -50,26 +48,29 @@ object SlidingLineChart {
       $.setState(Some(chart))
     }
 
-    var lastPoints = Queue.empty[(Double, Double)]
+    var lastPoints = Seq.empty[TimedValue[Double]]
 
     def drawChart(c: Chart): Unit = {
-      val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last._1
+      val lastTimeStamp = if (lastPoints.isEmpty) -1 else lastPoints.last.time
 
       val points = $.props.runNow().points
 
       if (points.nonEmpty) {
-        val newPoints = points.dropWhile(_._1 <= lastTimeStamp)
+        val newPoints = points.dropWhile(_.time <= lastTimeStamp)
 
-        val numRemoved = if (newPoints.nonEmpty) lastPoints.takeWhile(_._1 < points.head._1).size else 0
+        val numRemoved = if (newPoints.nonEmpty) {
+          lastPoints.view.takeWhile(_.time < points.head.time).size
+        } else 0
 
         lastPoints = points
 
-        val data = c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0).data.asInstanceOf[js.Array[js.Dynamic]]
+        val data = c.data.datasets.asInstanceOf[js.Array[js.Dynamic]](0)
+          .data.asInstanceOf[js.Array[js.Dynamic]]
 
         newPoints.foreach { p =>
           data.push(js.Dynamic.literal(
-            "x" -> p._1,
-            "y" -> p._2
+            "x" -> p.time,
+            "y" -> p.value
           ))
         }
 
@@ -93,12 +94,12 @@ object SlidingLineChart {
   val component = ReactComponentB[Props](getClass.getSimpleName)
     .initialState(None: Option[Chart])
     .renderBackend[Backend]
-    .shouldComponentUpdate(_ => false)
+    .shouldComponentUpdate(s => s.$.props != s.nextProps || s.$.state != s.nextState)
     .componentDidMount(_.backend.onMount)
-    .componentWillReceiveProps(_.component.backend.onUpdate)
+    .componentDidUpdate(_.component.backend.onUpdate)
     .build
 
-  def apply(newPoints: Queue[(Double, Double)]) = {
+  def apply(newPoints: Seq[TimedValue[Double]]) = {
     component(Props(newPoints))
   }
 }

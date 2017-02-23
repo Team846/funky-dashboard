@@ -5,8 +5,8 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
 import scala.collection.immutable.Queue
 
-object TimeTableNumeric {
-  case class Props(newPoints: Queue[(Double, List[TimeTableValue])])
+object TableDataset {
+  case class Props(newPoints: Queue[TimedValue[List[TablePair]]])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
@@ -16,8 +16,8 @@ object TimeTableNumeric {
         thead(
           tr(th("Key"), th("Value"))
         ),
-        tbody()(
-          newPoints.last._2.map { elem =>
+        tbody(
+          newPoints.last.value.map { elem =>
             tr(
               td(elem.key),
               td(elem.value)
@@ -33,7 +33,7 @@ object TimeTableNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[(Double, List[TimeTableValue])]) = {
+  def apply(newPoints: Queue[TimedValue[List[TablePair]]]) = {
     component(Props(newPoints))
   }
 

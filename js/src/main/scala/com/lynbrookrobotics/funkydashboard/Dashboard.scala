@@ -5,10 +5,9 @@ import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
 import org.scalajs.dom.ext.Ajax
 import com.payalabs.scalajs.react.mdl._
 import org.scalajs.dom._
+import play.api.libs.json.Json
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import upickle.default._
-
 import scala.collection.immutable.Queue
 
 object DashboardContainer {
@@ -16,7 +15,7 @@ object DashboardContainer {
     def componentDidMount: Callback = Callback {
       Ajax.get("/datasets.json").foreach { result =>
         val text = result.responseText
-        val parsed: Vector[DatasetGroupDefinition] = read[Vector[DatasetGroupDefinition]](text)
+        val parsed: Vector[DatasetGroupDefinition] = Json.parse(text).as[Vector[DatasetGroupDefinition]]
         $.setState(parsed).runNow()
       }
     }
@@ -39,7 +38,7 @@ object DashboardContainer {
 
 object Dashboard {
   case class Props(groups: Vector[DatasetGroupDefinition])
-  case class State(postToServer: String => Unit, paused: Boolean, activeGroupIndex: Int, pointsWindow: Queue[(Double, Map[String, Map[String, String]])])
+  case class State(postToServer: String => Unit, paused: Boolean, activeGroupIndex: Int, pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
 
   class Backend($: BackendScope[Props, State]) {
     val websocketProtocol = if (window.location.protocol == "https") {
@@ -61,7 +60,7 @@ object Dashboard {
       }.runNow()
 
       datastream.onmessage = (e: MessageEvent) => {
-        val newValues = read[(Double, Map[String, Map[String, String]])](e.data.toString)
+        val newValues = Json.parse(e.data.toString).as[TimedValue[Map[String, Map[String, String]]]]
         $.modState { state =>
           state.copy(
             pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
@@ -107,8 +106,10 @@ object Dashboard {
               group.datasets.map { d =>
                 DatasetCard(
                   d.name,
-                  Dataset.extract(d, s => postToServer(write((group.name, d.name, s))))(pointsWindow.flatMap { case (timestamp, updates) =>
-                    updates.get(group.name).flatMap(_.get(d.name)).map(v => (timestamp, v))
+                  Dataset.extract(d, s => {
+                    postToServer(Json.toJson(List(group.name, d.name, s)).toString)
+                  })(pointsWindow.flatMap { case TimedValue(timestamp, updates) =>
+                    updates.get(group.name).flatMap(_.get(d.name)).map(v => TimedValue(timestamp, v))
                   })
                 )
               }
@@ -122,7 +123,7 @@ object Dashboard {
   }
 
   val component = ReactComponentB[Props](getClass.getSimpleName)
-    .initialState(State(s => (), false, 0, Queue.empty[(Double, Map[String, Map[String, String]])]))
+    .initialState(State(s => (), false, 0, Queue.empty[TimedValue[Map[String, Map[String, String]]]]))
     .renderBackend[Backend]
     .componentDidMount(_.backend.componentDidMount)
     .shouldComponentUpdate(b => !b.$.state.paused || b.nextState.activeGroupIndex != b.$.state.activeGroupIndex)

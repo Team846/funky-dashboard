@@ -1,46 +1,51 @@
 package com.lynbrookrobotics.funkydashboard
 
 import japgolly.scalajs.react.{ReactComponentU, TopNode}
-import upickle.default._
+import play.api.libs.json.Json
 
 import scala.collection.immutable.Queue
 
 object Dataset {
-  def extract(definition: DatasetDefinition, sendData: String => Unit): Queue[(Double, String)] => ReactComponentU[_, _, _, TopNode] = {
+  def extract(definition: DatasetDefinition, sendData: String => Unit): Queue[TimedValue[String]] => ReactComponentU[_, _, _, TopNode] = {
     definition match {
       case DatasetDefinition(_, "time-series-numeric") =>
         values => TimeSeriesNumeric(
-          values.map(v => (v._1, read[TimeSeriesValue](v._2)))
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[Double]))
+        )
+
+      case DatasetDefinition(_, "time-push") =>
+        values => TimePushNumeric(
+          values.map(v => (v.time, Json.parse(v.value).as[Seq[TimedValue[Double]]]))
         )
 
       case DatasetDefinition(_, "time-multiple-dataset") =>
         values => MultipleTimeSeriesNumeric(
-          values.map(v => (v._1, read[TimeSeriesListValue](v._2)))
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[List[Double]]))
         )
 
-      case DatasetDefinition(_, "time-series-table") =>
-        values => TimeTableNumeric(
-          values.map(v => (v._1, read[List[TimeTableValue]](v._2)))
+      case DatasetDefinition(_, "table") =>
+        values => TableDataset(
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[List[TablePair]]))
         )
 
       case DatasetDefinition(_, "time-snapshot") =>
         values => TimeSnapshotNumeric(
-          values.map(v => (v._1, read[TimeSnapshotValue](v._2)))
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[List[Double]].headOption))
         )
 
       case DatasetDefinition(_, "image-stream") =>
         values => ImageStream(
-          values.map(v => read[ImageStreamValue](v._2))
+          values.map(v => Json.parse(v.value).as[String])
         )
 
       case DatasetDefinition(_, "time-text") =>
-        values => TimeTextNumeric(
-          values.map(v => (v._1, read[TimeTextValue](v._2)))
+        values => TimeText(
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[String]))
         )
 
       case DatasetDefinition(_, "json-editor") => values =>
         JsonEditorDataset(
-          values.map(v => (v._1, read[JsonEditorValue](v._2))),
+          values.map(v => TimedValue(v.time, Json.parse(v.value).as[String])),
           sendData
         )
     }

@@ -1,11 +1,9 @@
 package com.lynbrookrobotics.funkydashboard
 
-import upickle.default._
-
 class DatasetGroup(name: String) {
   private var datasets: List[Dataset[_]] = List.empty
 
-  def properties = DatasetGroupDefinition(name, datasets.map(d => write(d.definition)))
+  def properties = DatasetGroupDefinition(name, datasets.map(_.definition))
   def currentValue: Map[String, String] = datasets.map(d => d.definition.name -> d.currentValueJSON).toMap
   def dataset(name: String): Option[Dataset[_]] = datasets.find(_.definition.name == name)
 

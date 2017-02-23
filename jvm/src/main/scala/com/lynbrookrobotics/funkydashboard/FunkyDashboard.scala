@@ -2,23 +2,18 @@ package com.lynbrookrobotics.funkydashboard
 
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.ActorMaterializer
-
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.ws.TextMessage
 import akka.http.scaladsl.model.ws.Message
 import akka.http.scaladsl.model.ws.UpgradeToWebSocket
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import play.api.libs.json.Json
 
 import scala.collection.mutable
-
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
-
-import upickle.default._
-
 import scala.language.postfixOps
-
 
 class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionContext) {
   private val datasetGroups = mutable.Map[String, DatasetGroup]()
@@ -27,12 +22,12 @@ class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionCont
 
   val source = Source.tick(0 millis, 125 millis, ()).map { _ =>
     val time = System.currentTimeMillis()
-    val toSend = (time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))
-    TextMessage(write(toSend))
+    val toSend = TimedValue(time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))
+    TextMessage(Json.toJson(toSend).toString())
   }
 
   private def handleIncomingString(string: String): Unit = {
-    val (groupName, datasetName, value) = read[(String, String, String)](string)
+    val List(groupName, datasetName, value) = Json.parse(string).as[List[String]]
     datasetGroups.get(groupName).foreach { g =>
       g.dataset(datasetName).foreach { d =>
         d.handleIncomingData(value)
@@ -62,7 +57,7 @@ class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionCont
       complete(HttpResponse(
         entity = HttpEntity(
           ContentTypes.`application/json`,
-          write(datasetGroups.values.toVector.map(_.properties))
+          Json.toJson(datasetGroups.values.toVector.map(_.properties)).toString()
         )
       ))
     } ~ path("datastream") {

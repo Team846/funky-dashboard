@@ -6,19 +6,17 @@ import japgolly.scalajs.react.vdom.all._
 import scala.collection.immutable.Queue
 
 object TimeSeriesNumeric {
-  case class Props(newPoints: Queue[(Double, TimeSeriesValue)])
+  case class Props(newPoints: Seq[TimedValue[Double]])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
       import props._
 
-      val newValues = newPoints.map(t => (t._1, t._2.value))
-
       div(
-        if (newValues.nonEmpty) {
-          h3(textAlign := "center")(newValues.last._2)
+        if (newPoints.nonEmpty) {
+          h3(textAlign := "center")(newPoints.last.value)
         } else EmptyTag,
-        SlidingLineChart(newValues)
+        SlidingLineChart(newPoints)
       )
     }
   }
@@ -28,7 +26,7 @@ object TimeSeriesNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[(Double, TimeSeriesValue)]) = {
+  def apply(newPoints: Seq[TimedValue[Double]]) = {
     component(Props(newPoints))
   }
 }

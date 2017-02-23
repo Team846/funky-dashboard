@@ -6,20 +6,20 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import scala.collection.immutable.Queue
 
 object TimeSnapshotNumeric {
-  case class Props(newPoints: Queue[(Double, TimeSnapshotValue)])
+  case class Props(newPoints: Queue[TimedValue[Option[Double]]])
 
   class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
       import props._
 
-      val newValues = newPoints.map(t => (t._1, t._2.value))
+      val segment = newPoints.view.reverse.dropWhile(_.value.isEmpty)
+        .takeWhile(_.value.isDefined).reverse.map(t => TimedValue(t.time, t.value.get))
 
       div(
-        if (newValues.nonEmpty) {
-          h3(textAlign := "center")(newValues.last._2)
+        if (newPoints.nonEmpty) {
+          h3(textAlign := "center")(segment.last.value)
         } else EmptyTag,
-        SlidingLineChart(newValues.dropWhile(_._2.isEmpty)
-          .takeWhile(_._2.isDefined).map(t => t._1 -> t._2.get))
+        SlidingLineChart(segment)
       )
     }
   }
@@ -29,9 +29,7 @@ object TimeSnapshotNumeric {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[(Double, TimeSnapshotValue)]) = {
-    val reverseList = newPoints.reverse.dropWhile(_._2.value.isEmpty)
-    val newList = reverseList.takeWhile(_._2.value.isDefined)
-    component(Props(newList.reverse))
+  def apply(newPoints: Queue[TimedValue[Option[Double]]]) = {
+    component(Props(newPoints))
   }
 }

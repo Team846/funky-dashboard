@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.funkydashboard
 
-import upickle.default._
+import play.api.libs.json.{Json, Writes}
 
-abstract class Dataset[T](implicit valueWriter: Writer[T]) {
+abstract class Dataset[T](implicit valueWriter: Writes[T]) {
   val definition: DatasetDefinition
 
   def currentValue: T
@@ -12,6 +12,6 @@ abstract class Dataset[T](implicit valueWriter: Writer[T]) {
   }
 
   def currentValueJSON: String = {
-    write(currentValue)
+    Json.toJson(currentValue).toString()
   }
 }
