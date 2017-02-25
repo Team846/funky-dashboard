@@ -5,19 +5,14 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 
 import scala.collection.immutable.Queue
 
-object TimeText {
-  case class Props(newPoints: Queue[TimedValue[String]])
+object Errors {
 
-  class Backend($: BackendScope[Props, Unit]){
+  case class Props(newPoints: Queue[String])
+
+  class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
-      import props._
-
       div(
-        if (newPoints.nonEmpty) {
-          div(
-            p(newPoints.last.value)
-          )
-        } else EmptyTag
+        p("errors are toasted")
       )
     }
   }
@@ -27,7 +22,7 @@ object TimeText {
     .renderBackend[Backend]
     .build
 
-  def apply(newPoints: Queue[TimedValue[String]]) = {
+  def apply(newPoints: Queue[String]) = {
     component(Props(newPoints))
   }
 }

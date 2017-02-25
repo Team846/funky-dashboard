@@ -1,16 +1,18 @@
 package com.lynbrookrobotics.funkydashboard
 
+import com.payalabs.scalajs.react.mdl._
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
-import org.scalajs.dom.ext.Ajax
-import com.payalabs.scalajs.react.mdl._
 import org.scalajs.dom._
+import org.scalajs.dom.ext.Ajax
 import play.api.libs.json.Json
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.immutable.Queue
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js.Dynamic
 
 object DashboardContainer {
+
   class Backend($: BackendScope[Unit, Vector[DatasetGroupDefinition]]) {
     def componentDidMount: Callback = Callback {
       Ajax.get("/datasets.json").foreach { result =>
@@ -37,7 +39,9 @@ object DashboardContainer {
 }
 
 object Dashboard {
+
   case class Props(groups: Vector[DatasetGroupDefinition])
+
   case class State(postToServer: String => Unit, paused: Boolean, activeGroupIndex: Int, pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
 
   class Backend($: BackendScope[Props, State]) {
@@ -61,6 +65,10 @@ object Dashboard {
 
       datastream.onmessage = (e: MessageEvent) => {
         val newValues = Json.parse(e.data.toString).as[TimedValue[Map[String, Map[String, String]]]]
+
+        val errorMessage = newValues.value.get("Errors").get("Errors")
+        if (errorMessage != null && !errorMessage.replaceAll("\"", "").isEmpty) Dynamic.global.displayError(errorMessage)
+
         $.modState { state =>
           state.copy(
             pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
@@ -70,7 +78,8 @@ object Dashboard {
     }
 
     def render(props: Props, state: State) = {
-      import props._, state._
+      import props._
+      import state._
 
       div(className := "mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header")(
         header(className := "mdl-layout__header")(
@@ -103,7 +112,7 @@ object Dashboard {
           div(className := "mdl-grid")(
             if (activeGroupIndex < groups.size) {
               val group = groups(activeGroupIndex)
-              group.datasets.map { d =>
+              group.datasets.filter(p => !p.name.equals("errorstream")).map { d =>
                 DatasetCard(
                   d.name,
                   Dataset.extract(d, s => {
