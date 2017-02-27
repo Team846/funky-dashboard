@@ -1,16 +1,18 @@
 package com.lynbrookrobotics.funkydashboard
 
+import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.ActorMaterializer
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
+import akka.http.scaladsl.model.ws.TextMessage
+import akka.http.scaladsl.model.ws.Message
+import akka.http.scaladsl.model.ws.UpgradeToWebSocket
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
 import play.api.libs.json.Json
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
 class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionContext) {
@@ -37,9 +39,9 @@ class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionCont
     case TextMessage.Strict(msg) ⇒
       handleIncomingString(msg)
     case TextMessage.Streamed(stream) => stream
-      .limit(100) // Max frames we are willing to wait for
+      .limit(100)                   // Max frames we are willing to wait for
       .completionTimeout(5 seconds) // Max time until last frame
-      .runFold("")(_ + _) // Merges the frames
+      .runFold("")(_ + _)           // Merges the frames
       .map(s => handleIncomingString(s))
 
     case _ =>
@@ -51,14 +53,14 @@ class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionCont
     } ~ pathPrefix("") {
       encodeResponse(getFromResourceDirectory("META-INF/resources"))
     } ~
-      path("datasets.json") {
-        complete(HttpResponse(
-          entity = HttpEntity(
-            ContentTypes.`application/json`,
-            Json.toJson(datasetGroups.values.toVector.map(_.properties)).toString()
-          )
-        ))
-      } ~ path("datastream") {
+    path("datasets.json") {
+      complete(HttpResponse(
+        entity = HttpEntity(
+          ContentTypes.`application/json`,
+          Json.toJson(datasetGroups.values.toVector.map(_.properties)).toString()
+        )
+      ))
+    } ~ path("datastream") {
       optionalHeaderValueByType[UpgradeToWebSocket](()) {
         case Some(header) =>
           complete(header.handleMessagesWithSinkSource(sink, source))

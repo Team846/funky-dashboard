@@ -49,17 +49,6 @@ object Main extends App {
     }
   ))
 
-  val errorsTest = new Errors("Errors")
-  dashboard.datasetGroup("Errors").addDataset(errorsTest)
-  new Thread(()=>{
-    var i = 0
-    while(true) {
-      errorsTest.pushErr("Error #"+i)
-      i += 1
-      Thread.sleep(5000)
-    }
-  }).start()
-
   val pushDataset = new TimePushNumeric("pushed")
   dashboard.datasetGroup("push").addDataset(pushDataset)
 

@@ -8,7 +8,7 @@ import scala.collection.immutable.Queue
 object TimeText {
   case class Props(newPoints: Queue[TimedValue[String]])
 
-  class Backend($: BackendScope[Props, Unit]){
+  class Backend($: BackendScope[Props, Unit]) {
     def render(props: Props) = {
       import props._
 

@@ -1,27 +1,12 @@
 <html>
-<head>
-    <link rel="stylesheet" href="/webjars/material-design-lite/1.2.0/material.min.css">
-    <link rel="stylesheet" href="/main.css">
-</head>
-<body>
-<div id="main-container"></div>
+    <head>
+        <link rel="stylesheet" href="/webjars/material-design-lite/1.2.0/material.min.css">
+        <link rel="stylesheet" href="/main.css">
+    </head>
+    <body>
+        <div id="main-container"></div>
 
-<!-- v For Error MDL Toasts v -->
-<div class="mdl-js-snackbar mdl-snackbar">
-    <div class="mdl-snackbar__text"></div>
-    <button type="button" class="mdl-snackbar__action"></button>
-    <script id="dispay-error-script">
-        function displayError(msg) {
-            var notification = document.querySelector('.mdl-js-snackbar');
-            notification.MaterialSnackbar.showSnackbar({
-                message: msg
-            });
-        }
-    </script>
-</div>
-<!-- ^ For Error MDL Toasts ^ -->
-
-<script src="/webjars/material-design-lite/1.2.0/material.min.js"></script>
-<script src="/sjs/funky-dashboard-opt-bundle.js"></script>
-</body>
+        <script src="/webjars/material-design-lite/1.2.0/material.min.js"></script>
+        <script src="/sjs/funky-dashboard-opt-bundle.js"></script>
+    </body>
 </html>

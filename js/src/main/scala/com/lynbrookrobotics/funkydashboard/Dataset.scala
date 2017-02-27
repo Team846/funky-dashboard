@@ -48,11 +48,6 @@ object Dataset {
           values.map(v => TimedValue(v.time, Json.parse(v.value).as[String])),
           sendData
         )
-
-      case DatasetDefinition(_, "errorstream") =>
-        values => Errors(
-          values.map(v => Json.parse(v.value).as[String])
-        )
     }
   }
 }
