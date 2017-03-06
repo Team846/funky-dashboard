@@ -15,7 +15,7 @@ lazy val dashboard = crossProject.in(file(".")).
   settings(
     organization := "com.lynbrookrobotics",
     name := "funky-dashboard",
-    version := "0.2.1-SNAPSHOT",
+    version := "0.2.1",
     libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.6.0-M3"
   )
 
