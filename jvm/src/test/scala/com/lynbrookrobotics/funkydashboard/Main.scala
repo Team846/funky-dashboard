@@ -14,7 +14,7 @@ object Main extends App {
   implicit val executionContext = system.dispatcher
   implicit val routingSettings = RoutingSettings.default
 
-  val dashboard = new FunkyDashboard
+  val dashboard = new FunkyDashboard(125)
 
   Http().bindAndHandle(Route.handlerFlow(dashboard.route), "0.0.0.0", 8080)
 

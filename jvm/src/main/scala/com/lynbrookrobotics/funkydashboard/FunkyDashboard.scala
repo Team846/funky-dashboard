@@ -15,12 +15,12 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-class FunkyDashboard(implicit materializer: ActorMaterializer, ec: ExecutionContext) {
+class FunkyDashboard(updatePeriod: Int)(implicit materializer: ActorMaterializer, ec: ExecutionContext) {
   private val datasetGroups = mutable.Map[String, DatasetGroup]()
 
   val startTime = System.currentTimeMillis()
 
-  val source = Source.tick(0 millis, 125 millis, ()).map { _ =>
+  val source = Source.tick(0 millis, updatePeriod millis, ()).map { _ =>
     val time = System.currentTimeMillis()
     val toSend = TimedValue(time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))
     TextMessage(Json.toJson(toSend).toString())
