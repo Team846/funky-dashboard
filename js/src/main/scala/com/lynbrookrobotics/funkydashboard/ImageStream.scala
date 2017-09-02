@@ -1,31 +1,28 @@
 package com.lynbrookrobotics.funkydashboard
 
-import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, ReactComponentU, TopNode}
-import japgolly.scalajs.react.vdom.all._
+import me.shadaj.slinky.core.Component
+import me.shadaj.slinky.core.annotations.react
+import me.shadaj.slinky.web.html._
 
 import scala.collection.immutable.Queue
+import scala.scalajs.js
 
-object ImageStream {
+@react class ImageStream extends Component {
   case class Props(newPoints: Queue[String])
+  type State = Unit
 
-  class Backend($: BackendScope[Props, Unit]) {
-    def render(props: Props) = {
-      val images = $.props.runNow().newPoints
-      val last = if (images.nonEmpty) images.last else ""
+  override def initialState: Unit = ()
 
-      div(
-        img(width := "100%")(src := s"data:image/jpg;base64,$last")
-      )
-    }
+  override def shouldComponentUpdate(nextProps: Props, nextState: Unit): Boolean = {
+    nextProps.newPoints.nonEmpty
   }
 
-  val component = ReactComponentB[Props](getClass.getSimpleName)
-    .stateless
-    .renderBackend[Backend]
-    .shouldComponentUpdate(_.nextProps.newPoints.nonEmpty)
-    .build
+  def render = {
+    val images = props.newPoints
+    val last = if (images.nonEmpty) images.last else ""
 
-  def apply(newPoints: Queue[String]) = {
-    component(Props(newPoints))
+    div(
+      img(style := js.Dynamic.literal(width = "100%"))(src := s"data:image/jpg;base64,$last")
+    )
   }
 }

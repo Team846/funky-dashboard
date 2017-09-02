@@ -1,32 +1,24 @@
 package com.lynbrookrobotics.funkydashboard
 
-import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import me.shadaj.slinky.core.Component
+import me.shadaj.slinky.core.annotations.react
+import me.shadaj.slinky.web.html._
 
 import scala.collection.immutable.Queue
+import scala.scalajs.js
 
-object MultipleTimeSeriesNumeric {
+@react class MultipleTimeSeriesNumeric extends Component {
   case class Props(newPoints: Queue[TimedValue[Seq[Double]]])
+  type State = Unit
 
-  class Backend($: BackendScope[Props, Unit]) {
-    def render(props: Props) = {
-      import props._
+  override def initialState: Unit = ()
 
-      div(
-        if (newPoints.nonEmpty) {
-          h3(textAlign := "center")(newPoints.last.value.mkString(","))
-        } else EmptyTag,
-        MultipleSlidingLineChart(newPoints)
-      )
-    }
-  }
-
-  val component = ReactComponentB[Props](getClass.getSimpleName)
-    .stateless
-    .renderBackend[Backend]
-    .build
-
-  def apply(newPoints: Queue[TimedValue[Seq[Double]]]) = {
-    component(Props(newPoints))
+  def render = {
+    div(
+      if (props.newPoints.nonEmpty) {
+        Some(h3(style := js.Dynamic.literal(textAlign = "center"))(props.newPoints.last.value.mkString(",")))
+      } else None,
+      MultipleSlidingLineChart(props.newPoints)
+    )
   }
 }

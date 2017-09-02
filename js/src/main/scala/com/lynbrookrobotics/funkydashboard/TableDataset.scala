@@ -1,40 +1,34 @@
 package com.lynbrookrobotics.funkydashboard
 
-import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import me.shadaj.slinky.core.Component
+import me.shadaj.slinky.core.annotations.react
+import me.shadaj.slinky.web.html._
 
 import scala.collection.immutable.Queue
+import scala.scalajs.js
 
-object TableDataset {
+@react class TableDataset extends Component {
   case class Props(newPoints: Queue[TimedValue[List[TablePair]]])
+  type State = Unit
 
-  class Backend($: BackendScope[Props, Unit]) {
-    def render(props: Props) = {
-      import props._
+  override def initialState: Unit = ()
 
-      table(className := "mdl-data-table mdl-js-data-table mdl-shadow--2dp", width := "100%")(
-        thead(
-          tr(th("Key"), th("Value"))
-        ),
-        tbody(
-          newPoints.last.value.map { elem =>
-            tr(
-              td(elem.key),
-              td(elem.value)
-            )
-          }
-        )
+  def render = {
+    table(
+      className := "mdl-data-table mdl-js-data-table mdl-shadow--2dp",
+      style := js.Dynamic.literal(width = "100%")
+    )(
+      thead(
+        tr(th("Key"), th("Value"))
+      ),
+      tbody(
+        props.newPoints.last.value.map { elem =>
+          tr(
+            td(elem.key),
+            td(elem.value)
+          )
+        }
       )
-    }
+    )
   }
-
-  val component = ReactComponentB[Props](getClass.getSimpleName)
-    .stateless
-    .renderBackend[Backend]
-    .build
-
-  def apply(newPoints: Queue[TimedValue[List[TablePair]]]) = {
-    component(Props(newPoints))
-  }
-
 }

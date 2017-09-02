@@ -1,21 +1,16 @@
 package com.lynbrookrobotics.funkydashboard
 
-import japgolly.scalajs.react.{ReactComponentU, TopNode}
+import me.shadaj.slinky.core.facade.ReactElement
 import play.api.libs.json.Json
 
 import scala.collection.immutable.Queue
 
 object Dataset {
-  def extract(definition: DatasetDefinition, sendData: String => Unit): Queue[TimedValue[String]] => ReactComponentU[_, _, _, TopNode] = {
+  def extract(definition: DatasetDefinition, sendData: String => Unit): Queue[TimedValue[String]] => ReactElement = {
     definition match {
       case DatasetDefinition(_, "time-series-numeric") =>
         values => TimeSeriesNumeric(
           values.map(v => TimedValue(v.time, Json.parse(v.value).as[Double]))
-        )
-
-      case DatasetDefinition(_, "time-push") =>
-        values => TimePushNumeric(
-          values.map(v => (v.time, Json.parse(v.value).as[Seq[TimedValue[Double]]]))
         )
 
       case DatasetDefinition(_, "time-multiple-dataset") =>

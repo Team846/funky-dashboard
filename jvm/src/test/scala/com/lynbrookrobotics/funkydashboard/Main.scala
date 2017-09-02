@@ -49,17 +49,9 @@ object Main extends App {
     }
   ))
 
-  val pushDataset = new TimePushNumeric("pushed")
-  dashboard.datasetGroup("push").addDataset(pushDataset)
-
-  new Thread(() => {
-    while (true) {
-      pushDataset.pushValue(math.random)
-      Thread.sleep(1000)
-    }
-  }).start()
-
   StdIn.readLine()
+
+  println("terminating!")
 
   system.terminate()
 }

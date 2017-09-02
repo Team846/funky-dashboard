@@ -1,15 +1,21 @@
 package com.lynbrookrobotics.jsoneditor
 
-import japgolly.scalajs.react._
-
-import com.payalabs.scalajs.react.bridge.ReactBridgeComponent
+import me.shadaj.slinky.core.ExternalComponent
+import me.shadaj.slinky.core.annotations.react
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 
-case class JsonEditor(id: js.UndefOr[String]  = js.undefined,
-                      className: js.UndefOr[String] = js.undefined,
-                      ref: js.UndefOr[String] = js.undefined,
-                      key: js.UndefOr[Any] = js.undefined,
-                      value: js.UndefOr[js.Dynamic],
-                      propagateChanges: js.UndefOr[js.Dynamic => Unit],
-                      styling: js.UndefOr[js.Dynamic] = js.undefined) extends ReactBridgeComponent
+@js.native
+@JSImport("react-json-edit", JSImport.Namespace)
+object JsonEditorModule extends js.Object {
+  val JsonEditor: js.Object = js.native
+}
+
+@react object JsonEditor extends ExternalComponent {
+  case class Props(value: js.UndefOr[js.Object],
+                   propagateChanges: js.UndefOr[js.Object => Unit],
+                   styling: js.UndefOr[js.Object])
+
+  override val component = JsonEditorModule.JsonEditor
+}

@@ -1,33 +1,24 @@
 package com.lynbrookrobotics.funkydashboard
 
-import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import me.shadaj.slinky.core.Component
+import me.shadaj.slinky.core.annotations.react
+import me.shadaj.slinky.web.html._
 
 import scala.collection.immutable.Queue
 
-object TimeText {
+@react class TimeText extends Component {
   case class Props(newPoints: Queue[TimedValue[String]])
+  type State = Unit
 
-  class Backend($: BackendScope[Props, Unit]) {
-    def render(props: Props) = {
-      import props._
+  override def initialState: Unit = ()
 
-      div(
-        if (newPoints.nonEmpty) {
-          div(
-            p(newPoints.last.value)
-          )
-        } else EmptyTag
-      )
-    }
-  }
-
-  val component = ReactComponentB[Props](getClass.getSimpleName)
-    .stateless
-    .renderBackend[Backend]
-    .build
-
-  def apply(newPoints: Queue[TimedValue[String]]) = {
-    component(Props(newPoints))
+  def render = {
+    div(
+      if (props.newPoints.nonEmpty) {
+        Some(div(
+          p(props.newPoints.last.value)
+        ))
+      } else None
+    )
   }
 }

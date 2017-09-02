@@ -1,73 +1,63 @@
 package com.lynbrookrobotics.funkydashboard
 
 import com.lynbrookrobotics.jsoneditor.JsonEditor
-import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
-import play.api.libs.json.JsValue
+import me.shadaj.slinky.core.Component
+import me.shadaj.slinky.core.annotations.react
+import me.shadaj.slinky.web.html._
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 
-object JsonEditorDataset {
+@react class JsonEditorDataset extends Component {
   case class Props(newPoints: Queue[TimedValue[String]], sendData: String => Unit)
+  type State = Unit
 
-  class Backend($: BackendScope[Props, Unit]) {
-    def render(props: Props) = {
-      import props._
+  override def initialState: Unit = ()
 
-      div(
-        if (newPoints.nonEmpty) {
-          div(margin := 10)(
-            JsonEditor(
-              value = JSON.parse(newPoints.last.value),
-              propagateChanges = (d: js.Dynamic) => {
-                sendData(JSON.stringify(d))
-              },
-              styling = js.Dynamic.literal(
-                "object" -> js.Dynamic.literal(
-                  "display" -> "inline"
-                ),
-                "array" -> js.Dynamic.literal(
-                  "display" -> "inline"
-                ),
-                "object-row" -> js.Dynamic.literal(
-                  "marginLeft" -> 15
-                ),
-                "array-row" -> js.Dynamic.literal(
-                  "marginLeft" -> 15
-                ),
-                "add-button" -> js.Dynamic.literal(
-                  "display" -> "none"
-                ),
-                "add-group" -> js.Dynamic.literal(
-                  "marginLeft" -> 15
-                ),
-                "add-input" -> js.Dynamic.literal(
-                  "display" -> "inline"
-                ),
-                "delete-button" -> js.Dynamic.literal(
-                  "display" -> "none"
-                ),
-                "key" -> js.Dynamic.literal(
-                  "display" -> "inline",
-                  "fontWeight" -> "bold",
-                  "marginRight" -> 5
-                )
+  def render = {
+    div(
+      if (props.newPoints.nonEmpty) {
+        div(style := js.Dynamic.literal(margin = 10))(
+          Some(JsonEditor(
+            JSON.parse(props.newPoints.last.value).asInstanceOf[js.Object],
+            (d: js.Object) => {
+              props.sendData(JSON.stringify(d))
+            },
+            js.Dynamic.literal(
+              "object" -> js.Dynamic.literal(
+                "display" -> "inline"
+              ),
+              "array" -> js.Dynamic.literal(
+                "display" -> "inline"
+              ),
+              "object-row" -> js.Dynamic.literal(
+                "marginLeft" -> 15
+              ),
+              "array-row" -> js.Dynamic.literal(
+                "marginLeft" -> 15
+              ),
+              "add-button" -> js.Dynamic.literal(
+                "display" -> "none"
+              ),
+              "add-group" -> js.Dynamic.literal(
+                "marginLeft" -> 15
+              ),
+              "add-input" -> js.Dynamic.literal(
+                "display" -> "inline"
+              ),
+              "delete-button" -> js.Dynamic.literal(
+                "display" -> "none"
+              ),
+              "key" -> js.Dynamic.literal(
+                "display" -> "inline",
+                "fontWeight" -> "bold",
+                "marginRight" -> 5
               )
-            )()
-          )
-        } else EmptyTag
-      )
-    }
-  }
-
-  val component = ReactComponentB[Props](getClass.getSimpleName)
-    .stateless
-    .renderBackend[Backend]
-    .build
-
-  def apply(newPoints: Queue[TimedValue[String]], sendData: String => Unit) = {
-    component(Props(newPoints, sendData))
+            )
+          ))
+        )
+      } else None
+    )
   }
 }

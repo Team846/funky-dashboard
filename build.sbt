@@ -2,7 +2,7 @@ organization := "com.lynbrookrobotics"
 
 name := "funky-dashboard"
 
-scalaVersion in ThisBuild := "2.12.1"
+scalaVersion in ThisBuild := "2.12.3"
 
 lazy val dashboardRoot = project.in(file(".")).
   aggregate(dashboardJS, dashboardJVM).
@@ -15,7 +15,7 @@ lazy val dashboard = crossProject.in(file(".")).
   settings(
     organization := "com.lynbrookrobotics",
     name := "funky-dashboard",
-    version := "0.2.1",
+    version := "0.3.0-SNAPSHOT",
     libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.6.0-M3"
   )
 

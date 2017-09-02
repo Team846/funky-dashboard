@@ -1,15 +1,7 @@
 language: scala
 jdk: oraclejdk8
 before_script:
-  - cd ..
-  - git clone https://github.com/payalabs/scalajs-react-mdl.git
-  - cd scalajs-react-mdl
-  - sbt +publishLocal
-  - cd ..
-  - git clone https://github.com/payalabs/scalajs-react-bridge.git
-  - cd scalajs-react-bridge
-  - sbt publishLocal
-  - cd ../funky-dashboard
+  - npm i -g yarn
 addons:
   apt:
     packages:
