@@ -1,45 +1,23 @@
 package com.lynbrookrobotics.funkydashboard
 
-import org.scalajs.dom.ext.Ajax
 import me.shadaj.slinky.core.Component
 import me.shadaj.slinky.core.annotations.react
 import me.shadaj.slinky.web.html._
 import org.scalajs.dom._
 import play.api.libs.json.Json
 import com.lynbrookrobotics.mdl._
+import org.scalajs.dom
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.immutable.Queue
 import scala.scalajs.js
 
 @react
-class DashboardContainer extends Component {
-  case class Props()
-  type State = Vector[DatasetGroupDefinition]
-
-  override def initialState: Vector[DatasetGroupDefinition] = Vector.empty
-
-  override def componentDidMount: Unit = {
-    Ajax.get("/datasets.json").foreach { result =>
-      val text = result.responseText
-      val parsed: Vector[DatasetGroupDefinition] = Json.parse(text).as[Vector[DatasetGroupDefinition]]
-      setState(parsed)
-    }
-  }
-
-  def render = {
-    div(
-      Dashboard(state)
-    )
-  }
-}
-
-import Dashboard.{Props, State} // patch for IntelliJ issues
-
-@react
 class Dashboard extends Component {
-  case class Props(groups: Vector[DatasetGroupDefinition])
-  case class State(postToServer: String => Unit, paused: Boolean, activeGroupIndex: Int, pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
+  case class Props()
+  case class State(postToServer: Option[String => Unit],
+                   paused: Boolean, activeGroupIndex: Int,
+                   groups: Vector[DatasetGroupDefinition],
+                   pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
 
   private val websocketProtocol = if (window.location.protocol == "https") {
     "wss"
@@ -47,30 +25,55 @@ class Dashboard extends Component {
     "ws"
   }
 
-  override def initialState: State = State(s => (), false, 0, Queue.empty[TimedValue[Map[String, Map[String, String]]]])
+  override def initialState: State = State(None, false, 0, Vector.empty, Queue.empty[TimedValue[Map[String, Map[String, String]]]])
 
   override def shouldComponentUpdate(nextProps: Props, nextState: State): Boolean = {
     !state.paused || nextState.activeGroupIndex != state.activeGroupIndex
   }
 
-  override def componentDidMount() = {
+  def connectWebsocket(): Unit = {
+    println(s"Attempting to connect websocket")
     val datastream = new WebSocket(s"$websocketProtocol://${window.location.host}/datastream")
 
-    setState(state.copy(
-      postToServer = datastream.send
-    ))
+    var hasRetried = false
+
+    datastream.onclose = _ => {
+      if (!hasRetried) {
+        hasRetried = true
+        setState(initialState)
+        dom.window.setTimeout(connectWebsocket: () => Unit, 500)
+      }
+    }
+
+    datastream.onerror = _ => {
+      if (!hasRetried) {
+        hasRetried = true
+        setState(initialState)
+        dom.window.setTimeout(connectWebsocket: () => Unit, 500)
+      }
+    }
 
     datastream.onmessage = (e: MessageEvent) => {
-      val newValues = Json.parse(e.data.toString).as[TimedValue[Map[String, Map[String, String]]]]
-      setState(state.copy(
-        pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
-      ))
+      if (state.postToServer.isDefined) {
+        val newValues = Json.parse(e.data.toString).as[TimedValue[Map[String, Map[String, String]]]]
+        setState(state.copy(
+          pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
+        ))
+      } else {
+        setState(state.copy(
+          postToServer = Some(datastream.send),
+          groups = Json.parse(e.data.toString).as[Vector[DatasetGroupDefinition]]
+        ))
+      }
     }
   }
 
+  override def componentDidMount() = {
+    connectWebsocket()
+  }
+
   def render = {
-    val Props(groups) = props
-    val State(postToServer, _, activeGroupIndex, pointsWindow) = state
+    val State(postToServer, paused, activeGroupIndex, groups, pointsWindow) = state
 
     div(className := "mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header")(
       header(className := "mdl-layout__header")(
@@ -103,13 +106,13 @@ class Dashboard extends Component {
       ),
       main(className := "mdl-layout__content mdl-color--grey-100", id := "groups-container")(
         div(className := "mdl-grid")(
-          if (activeGroupIndex < groups.size) {
+          if (postToServer.isDefined) {
             val group = groups(activeGroupIndex)
             group.datasets.zipWithIndex.map { case (d, i) =>
               DatasetCard(
                 d.name,
                 Dataset.extract(d, s => {
-                  postToServer(Json.toJson(List(group.name, d.name, s)).toString)
+                  postToServer.get.apply(Json.toJson(List(group.name, d.name, s)).toString)
                 })(pointsWindow.flatMap { case TimedValue(timestamp, updates) =>
                   updates.get(group.name).flatMap(_.get(d.name)).map(v => TimedValue(timestamp, v))
                 })

@@ -2,6 +2,8 @@ language: scala
 jdk: oraclejdk8
 before_script:
   - npm i -g yarn
+  - mkdir -p ~/.sbt/0.13/plugins
+  - echo 'addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC5")' > ~/.sbt/0.13/plugins/build.sbt
 addons:
   apt:
     packages:

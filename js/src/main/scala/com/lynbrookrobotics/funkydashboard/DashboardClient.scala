@@ -7,6 +7,6 @@ import scala.scalajs.js.JSApp
 
 object DashboardClient extends JSApp {
   def main(): Unit = {
-    ReactDOM.render(DashboardContainer(), dom.document.getElementById("main-container"))
+    ReactDOM.render(Dashboard(), dom.document.getElementById("main-container"))
   }
 }
