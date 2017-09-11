@@ -116,7 +116,7 @@ class Dashboard extends Component {
                 })(pointsWindow.flatMap { case TimedValue(timestamp, updates) =>
                   updates.get(group.name).flatMap(_.get(d.name)).map(v => TimedValue(timestamp, v))
                 })
-              ).apply(key = s"$activeGroupIndex-$i")
+              ).withKey(s"$activeGroupIndex-$i")
             }
           } else {
             h1("Loading")
