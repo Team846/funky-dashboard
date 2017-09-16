@@ -19,9 +19,11 @@ class FunkyDashboard(updatePeriod: Int, port: Int) {
   private val timer = new Timer
   timer.schedule(new TimerTask {
     override def run(): Unit = {
-      val time = System.currentTimeMillis()
-      val msg = Json.toJson(TimedValue(time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))).toString
-      listeners.foreach(_.apply(msg))
+      if (listeners.nonEmpty) {
+        val time = System.currentTimeMillis()
+        val msg = Json.toJson(TimedValue(time, datasetGroups.toMap.map(t => t._1 -> t._2.currentValue))).toString
+        listeners.foreach(_.apply(msg))
+      }
     }
   }, 0, updatePeriod)
 

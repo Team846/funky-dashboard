@@ -15,6 +15,10 @@ import scala.scalajs.js.JSON
 
   override def initialState: Unit = ()
 
+  override def shouldComponentUpdate(nextProps: Props, nextState: Unit): Boolean = {
+    nextProps.newPoints.lastOption != props.newPoints.lastOption
+  }
+
   def render = {
     div(
       if (props.newPoints.nonEmpty) {
