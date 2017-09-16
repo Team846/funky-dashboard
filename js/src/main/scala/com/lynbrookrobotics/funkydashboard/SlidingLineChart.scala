@@ -9,7 +9,7 @@ import org.scalajs.dom.{CanvasRenderingContext2D, Element, html}
 import scala.scalajs.js
 
 @react class SlidingLineChart extends Component {
-  case class Props(points: Seq[TimedValue[Double]])
+  case class Props(points: Seq[TimedValue[Double]], withNewPoints: Seq[TimedValue[Double]] => Unit)
   type State = Option[Chart]
 
   override def shouldComponentUpdate(nextProps: Props, nextState: Option[Chart]): Boolean = {
@@ -65,6 +65,10 @@ import scala.scalajs.js
 
     if (points.nonEmpty) {
       val newPoints = points.dropWhile(_.time <= lastTimeStamp)
+
+      if (newPoints.nonEmpty) {
+        props.withNewPoints(newPoints)
+      }
 
       val numRemoved = if (newPoints.nonEmpty) {
         lastPoints.view.takeWhile(_.time < points.head.time).size
