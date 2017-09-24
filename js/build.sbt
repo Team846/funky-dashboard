@@ -15,5 +15,3 @@ npmDependencies in Compile += "react-json-edit" -> "0.2.7"
 webpackConfigFile in fullOptJS := Some(baseDirectory.value / "webpack.config.js")
 
 scalaJSUseMainModuleInitializer := true
-
-useYarn := true
