@@ -7,8 +7,8 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.
 
 libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.2.0-SNAPSHOT" // React DOM, HTML and SVG tags
 
-npmDependencies in Compile += "react" -> "15.6.1"
-npmDependencies in Compile += "react-dom" -> "15.6.1"
+npmDependencies in Compile += "react" -> "16.0.0"
+npmDependencies in Compile += "react-dom" -> "16.0.0"
 npmDependencies in Compile += "chart.js" -> "2.6.0"
 npmDependencies in Compile += "react-json-edit" -> "0.2.7"
 
