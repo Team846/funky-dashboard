@@ -37,7 +37,7 @@ import com.lynbrookrobotics.mdl._
     div(
       if (props.newPoints.nonEmpty) {
         Some(h3(style := js.Dynamic.literal(textAlign = "center"))(
-          props.newPoints.last.value.toString
+          "%.3f".format(props.newPoints.last.value)
         ))
       } else None,
       SlidingLineChart(props.newPoints, newPoints => {

@@ -16,7 +16,7 @@ import scala.scalajs.js
   def render = {
     div(
       if (props.newPoints.nonEmpty) {
-        Some(h3(style := js.Dynamic.literal(textAlign = "center"))(props.newPoints.last.value.mkString(",")))
+        Some(h3(style := js.Dynamic.literal(textAlign = "center"))(props.newPoints.last.value.map("%.3f".format(_)).mkString(", ")))
       } else None,
       MultipleSlidingLineChart(props.newPoints)
     )

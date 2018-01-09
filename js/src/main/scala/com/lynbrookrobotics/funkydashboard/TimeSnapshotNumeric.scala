@@ -19,7 +19,7 @@ import scala.scalajs.js
 
     div(
       if (props.newPoints.nonEmpty) {
-        Some(h3(style := js.Dynamic.literal(textAlign = "center"))(segment.last.value.toString))
+        Some(h3(style := js.Dynamic.literal(textAlign = "center"))("%.3f".format(segment.last.value)))
       } else None,
       SlidingLineChart(segment, _ => ())
     )
