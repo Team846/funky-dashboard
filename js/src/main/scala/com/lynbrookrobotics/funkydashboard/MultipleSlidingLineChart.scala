@@ -41,7 +41,7 @@ import scala.scalajs.js
                   "displayFormats" -> js.Dynamic.literal(
                     "millisecond" -> "ss.SSS"
                   ),
-                  "tooltipFormat" -> "SS [ms]"
+                  "tooltipFormat" -> "SSS [ms]"
                 ),
                 "position" -> "bottom"
               )
