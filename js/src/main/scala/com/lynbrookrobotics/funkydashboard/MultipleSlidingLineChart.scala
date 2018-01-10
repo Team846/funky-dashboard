@@ -38,7 +38,10 @@ import scala.scalajs.js
                 "time" -> js.Dynamic.literal(
                   "unitStepSize" -> 1000,
                   "unit" -> "millisecond",
-                  "tooltipFormat" -> "SSS [ms]"
+                  "displayFormats" -> js.Dynamic.literal(
+                    "millisecond" -> "ss.SSS"
+                  ),
+                  "tooltipFormat" -> "SS [ms]"
                 ),
                 "position" -> "bottom"
               )
