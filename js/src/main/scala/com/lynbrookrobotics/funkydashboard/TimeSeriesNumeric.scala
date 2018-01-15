@@ -17,7 +17,7 @@ import com.lynbrookrobotics.mdl._
     if (state.isDefined) {
       val firstTime = state.get.head.time
       val text = ("Time,Value" +: state.get.map { v =>
-        s"${(v.time - firstTime).toDouble / 1000},${v.value}"
+        s"${(v.time - firstTime).toDouble / 1000}, ${v.value}"
       }).mkString("\n")
 
       val blob = new Blob(js.Array(text: js.Any), BlobPropertyBag("text/csv"))

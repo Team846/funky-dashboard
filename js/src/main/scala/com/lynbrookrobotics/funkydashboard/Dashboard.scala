@@ -6,14 +6,18 @@ import me.shadaj.slinky.web.html._
 import org.scalajs.dom._
 import play.api.libs.json.Json
 import com.lynbrookrobotics.mdl._
+import me.shadaj.slinky.web.svg.y
 import org.scalajs.dom
+import org.scalajs.dom.raw.{Blob, BlobPropertyBag, URL}
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
 
 @react
 class Dashboard extends Component {
+
   case class Props()
+
   case class State(postToServer: Option[String => Unit],
                    paused: Boolean, activeGroupIndex: Int,
                    groups: Vector[DatasetGroupDefinition],
@@ -72,6 +76,61 @@ class Dashboard extends Component {
     connectWebsocket()
   }
 
+  var recording: Int = 0
+
+  var firstTime: Long = 0
+
+  var data: String = "Time,"
+
+  def toggleRecording() = {
+    println("toggle recording")
+    recording += 1
+    if (recording == 1) {
+      firstTime = state.pointsWindow.last.time
+      state.pointsWindow.last.value.keys.foreach(x => data += x + ",")
+
+      //remove extra comma
+      data = data.dropRight(1)
+
+      //add newline
+      data += "\n"
+    }
+  }
+
+  override def componentDidUpdate(prevProps: Props, prevState: State): Unit = {
+    if (recording > 0) {
+
+      //add time
+      data += s"${(state.pointsWindow.last.time - firstTime).toDouble / 1000}" + ","
+
+      state.pointsWindow.last.value.foreach(x => x._2.foreach(y => {
+        var string = y._2
+
+        //deal with commas by appending quotes around string, but only if needed
+        if (string.dropRight(string.length - 1).equals("\"")) string = string.drop(1)
+        if (string.drop(string.length - 1).equals("\"")) string = string.dropRight(1)
+
+        //deal with double quotes inside string
+        data += "\"" + string.replace("\"", "\"\"") + "\","
+
+      }))
+
+      //remove extra commma
+      data = data.dropRight(1)
+
+      //add new line
+      data += "\n"
+
+      if (recording == 2) {
+        val blob = new Blob(js.Array(data: js.Any), BlobPropertyBag("text/csv"))
+        val url = URL.createObjectURL(blob)
+        dom.window.location.assign(url)
+        recording = 0
+        data = "Time,"
+      }
+    }
+  }
+
   def render = {
     val State(postToServer, paused, activeGroupIndex, groups, pointsWindow) = state
 
@@ -84,7 +143,13 @@ class Dashboard extends Component {
             id := "pause-button",
             className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
             onClick := (_ => setState(state.copy(paused = !state.paused)))
-          )("Toggle Pause").material
+          )("Toggle Pause").material,
+          button(
+            id := "record-button",
+            className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
+            onClick := (_ => toggleRecording())
+          )("Toggle Record").material
+
         )
       ),
       div(className := "mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50")(
