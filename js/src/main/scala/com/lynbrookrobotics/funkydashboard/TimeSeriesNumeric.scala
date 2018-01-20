@@ -10,7 +10,7 @@ import scala.scalajs.js
 import com.lynbrookrobotics.mdl._
 
 @react class TimeSeriesNumeric extends Component {
-  case class Props(newPoints: Seq[TimedValue[Double]])
+  case class Props(newPoints: Seq[TimedValue[Double]], units: String)
   type State = Option[Seq[TimedValue[Double]]]
 
   def handleRecordToggle(): Unit = {
@@ -37,7 +37,7 @@ import com.lynbrookrobotics.mdl._
     div(
       if (props.newPoints.nonEmpty) {
         Some(h3(style := js.Dynamic.literal(textAlign = "center"))(
-          "%.3f".format(props.newPoints.last.value)
+          "%.3f".format(props.newPoints.last.value) + " " + props.units
         ))
       } else None,
       SlidingLineChart(props.newPoints, newPoints => {
