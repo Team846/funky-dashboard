@@ -12,7 +12,7 @@ object Main extends App {
     else "message"
   }))
 
-  dashboard.datasetGroup("Multiple List Test").addDataset(new TimeSeriesLists("Multiple Lists")("Multiply Units!")(
+  dashboard.datasetGroup("Multiple List Test").addDataset(new TimeSeriesLists("Multiple Lists")("Multiple Units!")(
     List(math.random(),math.random())
   ))
 
