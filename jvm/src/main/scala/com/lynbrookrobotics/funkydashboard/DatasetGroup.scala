@@ -11,7 +11,10 @@ class DatasetGroup(name: String) {
 
   def addDataset(dataset: Dataset[_]): Unit = {
     if (datasets.map(_.definition.name).contains(dataset.definition.name)) {
-      throw new IllegalArgumentException(s"Overriding name of existing DatasetGroup(${this.properties.name})")
+      val dName = dataset.definition.name
+      throw new IllegalArgumentException(
+        s"Not overriding existing Dataset($dName), because it is already in DatasetGroup(${this.properties.name})"
+      )
     }
     datasets = datasets :+ dataset
   }
