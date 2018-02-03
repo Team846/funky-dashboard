@@ -2,7 +2,6 @@ package com.lynbrookrobotics.funkydashboard
 
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import java.util.Base64
 import javax.imageio.ImageIO
 
 class ImageStream(name: String)(value: => BufferedImage) extends Dataset[String] {

@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.funkydashboard
 
-import me.shadaj.slinky.web.ReactDOM
+import slinky.web.ReactDOM
 import org.scalajs.dom
 
 import scala.scalajs.js.JSApp

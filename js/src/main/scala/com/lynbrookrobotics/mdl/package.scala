@@ -1,9 +1,9 @@
 package com.lynbrookrobotics
 
-import me.shadaj.slinky.core.{Component, TagComponent}
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.core.facade.{React, ReactElement}
-import me.shadaj.slinky.web.ReactDOM
+import slinky.core.StatelessComponent
+import slinky.core.annotations.react
+import slinky.core.facade.{React, ReactElement}
+import slinky.web.ReactDOM
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -13,10 +13,8 @@ package object mdl {
     js.Dynamic.global.componentHandler.upgradeElement(top)
   }
 
-  @react
-  class MaterialComponent extends Component {
+  @react class MaterialComponent extends StatelessComponent {
     type Props = ReactElement
-    type State = Unit
 
     override def componentDidMount(): Unit = {
       upgrade(ReactDOM.findDOMNode(this.asInstanceOf[React.Component]))
@@ -26,20 +24,12 @@ package object mdl {
       upgrade(ReactDOM.findDOMNode(this.asInstanceOf[React.Component]))
     }
 
-    override def initialState: Unit = ()
-
     override def render(): ReactElement = {
       props
     }
   }
 
-  implicit class MaterialAble(val elem: ReactElement) extends AnyVal {
-    def material: ReactElement = {
-      MaterialComponent(elem)
-    }
-  }
-
-  implicit class MaterialAbleTag(val elem: TagComponent[_]) extends AnyVal {
+  implicit class MaterialAble[T <% ReactElement](val elem: T) {
     def material: ReactElement = {
       MaterialComponent(elem)
     }

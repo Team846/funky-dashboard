@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.funkydashboard
 
-import play.api.libs.json.{Json, Writes}
+import argonaut._, Argonaut._, ArgonautShapeless._
 
-abstract class Dataset[T](implicit valueWriter: Writes[T]) {
+abstract class Dataset[T](implicit valueWriter: EncodeJson[T]) {
   val definition: DatasetDefinition
 
   def currentValue: T
@@ -12,6 +12,6 @@ abstract class Dataset[T](implicit valueWriter: Writes[T]) {
   }
 
   def currentValueJSON: String = {
-    Json.toJson(currentValue).toString()
+    currentValue.jencode.toString()
   }
 }
