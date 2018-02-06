@@ -93,24 +93,17 @@ class FunkyDashboard(updatePeriod: Int, port: Int) {
         )
         writer.flush()
 
-        new Thread(new Runnable {
-          override def run(): Unit = {
-            val in = socket.getInputStream
-            while (in.read() != -1) {}
-            socket.close()
-          }
-        }).start()
-
         var list: String => Unit = null
         list = (msg: String) => {
-          if (!socket.isClosed) {
+          try {
             writer.print(s"data: $msg\n\n")
             writer.flush()
-          } else {
-            listeners = listeners.filterNot(_ == list)
-            reader.close()
-            writer.close()
-            socket.close()
+          } catch {
+            case e =>
+              listeners = listeners.filterNot(_ == list)
+              reader.close()
+              writer.close()
+              socket.close()
           }
         }
 
