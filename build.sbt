@@ -12,7 +12,7 @@ name := "funky-dashboard"
 scalaVersion in ThisBuild := "2.12.4"
 
 lazy val dashboardRoot = project.in(file(".")).
-  aggregate(dashboardJS, dashboardJVM).
+  aggregate(dashboardJS, dashboardJVM, dashboardNative).
   settings(
     publish := {},
     publishLocal := {}
