@@ -22,7 +22,6 @@ lazy val dashboard = crossProject(JSPlatform, JVMPlatform, NativePlatform).cross
   settings(
     organization := "com.lynbrookrobotics",
     name := "funky-dashboard",
-    version := "0.3.0-SNAPSHOT",
     libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
     libraryDependencies += "io.argonaut" %%% "argonaut" % "6.2.1",
     libraryDependencies += "com.github.alexarchambault" %%% "argonaut-shapeless_6.2" % "1.2.0-M8"

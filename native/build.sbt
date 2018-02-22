@@ -1,3 +1,5 @@
+import scala.sys.process.Process
+
 resolvers += "Funky-Repo" at "http://lynbrookrobotics.com/repo"
 
 nativeMode := "debug"
