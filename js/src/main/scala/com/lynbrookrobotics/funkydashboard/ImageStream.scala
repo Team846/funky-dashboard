@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.funkydashboard
 
-import me.shadaj.slinky.core.Component
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.web.html._
+import slinky.core.Component
+import slinky.core.annotations.react
+import slinky.web.html._
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
@@ -22,7 +22,7 @@ import scala.scalajs.js
     val last = if (images.nonEmpty) images.last else ""
 
     div(
-      img(style := js.Dynamic.literal(width = "100%"))(src := s"data:image/jpg;base64,$last")
+      img(style := js.Dynamic.literal(width = "100%"), src := s"data:image/jpg;base64,$last")
     )
   }
 }

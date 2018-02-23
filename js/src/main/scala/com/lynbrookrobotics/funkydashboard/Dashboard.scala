@@ -1,16 +1,17 @@
 package com.lynbrookrobotics.funkydashboard
 
-import me.shadaj.slinky.core.Component
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.web.html._
+import slinky.core.Component
+import slinky.core.annotations.react
+import slinky.web.html._
 import org.scalajs.dom._
-import play.api.libs.json.Json
 import com.lynbrookrobotics.mdl._
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Blob, BlobPropertyBag, URL}
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
+
+import argonaut._, Argonaut._, ArgonautShapeless._
 
 @react
 class Dashboard extends Component {
@@ -22,12 +23,6 @@ class Dashboard extends Component {
                    groups: Vector[DatasetGroupDefinition],
                    pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
 
-  private val websocketProtocol = if (window.location.protocol == "https") {
-    "wss"
-  } else {
-    "ws"
-  }
-
   override def initialState: State = State(None, false, 0, Vector.empty, Queue.empty[TimedValue[Map[String, Map[String, String]]]])
 
   override def shouldComponentUpdate(nextProps: Props, nextState: State): Boolean = {
@@ -35,37 +30,27 @@ class Dashboard extends Component {
   }
 
   def connectWebsocket(): Unit = {
-    println(s"Attempting to connect websocket")
-    val datastream = new WebSocket(s"$websocketProtocol://${window.location.host}/datastream")
-
-    var hasRetried = false
-
-    datastream.onclose = _ => {
-      if (!hasRetried) {
-        hasRetried = true
-        setState(initialState)
-        dom.window.setTimeout(connectWebsocket: () => Unit, 500)
-      }
-    }
+    println(s"Attempting to connect to server")
+    val datastream = new EventSource("/sse")
 
     datastream.onerror = _ => {
-      if (!hasRetried) {
-        hasRetried = true
-        setState(initialState)
-        dom.window.setTimeout(connectWebsocket: () => Unit, 500)
-      }
+      setState(initialState)
     }
 
     datastream.onmessage = (e: MessageEvent) => {
       if (state.postToServer.isDefined) {
-        val newValues = Json.parse(e.data.toString).as[TimedValue[Map[String, Map[String, String]]]]
+        val newValues = e.data.asInstanceOf[String].decodeOption[TimedValue[Map[String, Map[String, String]]]].get
         setState(state.copy(
           pointsWindow = (state.pointsWindow :+ newValues).takeRight(50)
         ))
       } else {
         setState(state.copy(
-          postToServer = Some(datastream.send),
-          groups = Json.parse(e.data.toString).as[Vector[DatasetGroupDefinition]]
+          postToServer = Some(d => {
+            val req = new XMLHttpRequest
+            req.open("POST", "/post")
+            req.send(d)
+          }),
+          groups = e.data.asInstanceOf[String].decodeOption[Vector[DatasetGroupDefinition]].get
         ))
       }
     }
@@ -138,15 +123,14 @@ class Dashboard extends Component {
         div(className := "mdl-layout__header-row")(
           span(className := "mdl-layout-title")("Funky Dashboard"),
           div(className := "mdl-layout-spacer"),
-          button(style := js.Dynamic.literal(
-            marginRight = "15px"
-          ))(
-            id := "pause-button",
+          button(
+            style := js.Dynamic.literal(
+              marginRight = "15px"
+            ),
             className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
             onClick := (_ => setState(state.copy(paused = !state.paused)))
           )("Toggle Pause").material,
           button(
-            id := "record-button",
             className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
             onClick := (_ => toggleRecording())
           )("Toggle Record").material
@@ -154,7 +138,7 @@ class Dashboard extends Component {
       ),
       div(className := "mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50")(
         header(
-          img(src := "/images/Team_846_Logo.png", className := "team-logo")
+          img(src := "/Team_846_Logo.png", className := "team-logo")
         ),
         nav(id := "group-chooser", className := "group-chooser mdl-navigation mdl-color--blue-grey-800")(
           groups.zipWithIndex.map { case (group, index) =>
@@ -177,7 +161,7 @@ class Dashboard extends Component {
               DatasetCard(
                 d.name,
                 Dataset.extract(d, s => {
-                  postToServer.get.apply(Json.toJson(List(group.name, d.name, s)).toString)
+                  postToServer.get.apply(List(group.name, d.name, s).jencode.toString)
                 })(pointsWindow.flatMap { case TimedValue(timestamp, updates) =>
                   updates.get(group.name).flatMap(_.get(d.name)).map(v => TimedValue(timestamp, v))
                 })

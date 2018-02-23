@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.funkydashboard
 
-import me.shadaj.slinky.core.Component
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.web.html._
+import slinky.core.Component
+import slinky.core.annotations.react
+import slinky.web.html._
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Blob, BlobPropertyBag, URL}
 

@@ -1,9 +1,10 @@
 package com.lynbrookrobotics.funkydashboard
 
 import com.lynbrookrobotics.jsoneditor.JsonEditor
-import me.shadaj.slinky.core.Component
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.web.html._
+import slinky.core.Component
+import slinky.core.annotations.react
+import slinky.core.facade.ReactElement
+import slinky.web.html._
 
 import scala.collection.immutable.Queue
 import scala.scalajs.js
@@ -23,7 +24,7 @@ import scala.scalajs.js.JSON
     div(
       if (props.newPoints.nonEmpty) {
         div(style := js.Dynamic.literal(margin = 10))(
-          Some(JsonEditor(
+          JsonEditor(
             JSON.parse(props.newPoints.last.value).asInstanceOf[js.Object],
             (d: js.Object) => {
               props.sendData(JSON.stringify(d))
@@ -59,9 +60,9 @@ import scala.scalajs.js.JSON
                 "marginRight" -> 5
               )
             )
-          ))
-        )
-      } else None
+          )
+        ): ReactElement
+      } else None: ReactElement
     )
   }
 }

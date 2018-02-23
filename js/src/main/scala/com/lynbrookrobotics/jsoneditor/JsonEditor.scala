@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.jsoneditor
 
-import me.shadaj.slinky.core.ExternalComponent
-import me.shadaj.slinky.core.annotations.react
+import slinky.core.ExternalComponent
+import slinky.core.annotations.react
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport

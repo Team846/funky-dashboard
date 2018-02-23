@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.funkydashboard
 
 import com.lynbrookrobotics.chartjs.Chart
-import me.shadaj.slinky.core.Component
-import me.shadaj.slinky.core.annotations.react
-import me.shadaj.slinky.web.html._
+import slinky.core.Component
+import slinky.core.annotations.react
+import slinky.web.html._
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, Element, html}
 
