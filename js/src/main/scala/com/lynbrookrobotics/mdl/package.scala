@@ -17,11 +17,11 @@ package object mdl {
     type Props = ReactElement
 
     override def componentDidMount(): Unit = {
-      upgrade(ReactDOM.findDOMNode(this.asInstanceOf[React.Component]))
+      upgrade(ReactDOM.findDOMNode(this))
     }
 
     override def componentDidUpdate(prevProps: ReactElement, prevState: Unit): Unit = {
-      upgrade(ReactDOM.findDOMNode(this.asInstanceOf[React.Component]))
+      upgrade(ReactDOM.findDOMNode(this))
     }
 
     override def render(): ReactElement = {

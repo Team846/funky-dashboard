@@ -20,10 +20,18 @@ class Dashboard extends Component {
 
   case class State(postToServer: Option[String => Unit],
                    paused: Boolean, activeGroupIndex: Int,
+                   isRecording: Boolean,
                    groups: Vector[DatasetGroupDefinition],
                    pointsWindow: Queue[TimedValue[Map[String, Map[String, String]]]])
 
-  override def initialState: State = State(None, false, 0, Vector.empty, Queue.empty[TimedValue[Map[String, Map[String, String]]]])
+  override def initialState: State = State(
+    None,
+    false,
+    0,
+    false,
+    Vector.empty,
+    Queue.empty[TimedValue[Map[String, Map[String, String]]]]
+  )
 
   override def shouldComponentUpdate(nextProps: Props, nextState: State): Boolean = {
     !state.paused || nextState.activeGroupIndex != state.activeGroupIndex
@@ -60,63 +68,45 @@ class Dashboard extends Component {
     connectWebsocket()
   }
 
-  var recording: Int = 0
-
   var firstTime: Long = 0
 
-  var data: String = "Time,"
+  var data: String = ""
 
   def toggleRecording() = {
-    println("toggle recording")
-    recording += 1
-    if (recording == 1) {
+    if (!state.isRecording) {
       firstTime = state.pointsWindow.last.time
-      state.pointsWindow.last.value.keys.foreach(x => data += x + ",")
-
-      //remove extra comma
-      data = data.dropRight(1)
-
-      //add newline
-      data += "\n"
+      data = s"Time,${state.pointsWindow.last.value.values.flatMap(_.keys).mkString(",")}\n"
+      setState(_.copy(isRecording = true))
+    } else {
+      setState(_.copy(isRecording = false))
+      val blob = new Blob(js.Array(data: js.Any), BlobPropertyBag("text/csv"))
+      val url = URL.createObjectURL(blob)
+      dom.window.location.assign(url)
     }
   }
 
   override def componentDidUpdate(prevProps: Props, prevState: State): Unit = {
-    if (recording > 0) {
+    if (state.isRecording) {
+      val timeColumn = s"${(state.pointsWindow.last.time - firstTime).toDouble / 1000}"
 
-      //add time
-      data += s"${(state.pointsWindow.last.time - firstTime).toDouble / 1000}" + ","
-
-      state.pointsWindow.last.value.foreach(x => x._2.foreach(y => {
+      val cardValues = state.pointsWindow.last.value.flatMap(x => x._2.map(y => {
         var string = y._2
 
         //deal with commas by appending quotes around string, but only if needed
-        if (string.dropRight(string.length - 1).equals("\"")) string = string.drop(1)
-        if (string.drop(string.length - 1).equals("\"")) string = string.dropRight(1)
+        if (string.head == '\"') string = string.tail
+        if (string.last ==  '\"') string = string.init
 
         //deal with double quotes inside string
-        data += "\"" + string.replace("\"", "\"\"") + "\","
-
-      }))
-
-      //remove extra commma
-      data = data.dropRight(1)
+        "\"" + string.replace("\"", "\"\"") + "\""
+      })).mkString(",")
 
       //add new line
-      data += "\n"
-
-      if (recording == 2) {
-        val blob = new Blob(js.Array(data: js.Any), BlobPropertyBag("text/csv"))
-        val url = URL.createObjectURL(blob)
-        dom.window.location.assign(url)
-        recording = 0
-        data = "Time,"
-      }
+      data += s"$timeColumn,$cardValues\n"
     }
   }
 
   def render = {
-    val State(postToServer, paused, activeGroupIndex, groups, pointsWindow) = state
+    val State(postToServer, paused, activeGroupIndex, isRecording, groups, pointsWindow) = state
 
     div(className := "mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header")(
       header(className := "mdl-layout__header")(
@@ -129,11 +119,11 @@ class Dashboard extends Component {
             ),
             className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
             onClick := (_ => setState(state.copy(paused = !state.paused)))
-          )("Toggle Pause").material,
+          )(if (paused) "Unpause" else "Pause").material,
           button(
             className := "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent",
             onClick := (_ => toggleRecording())
-          )("Toggle Record").material
+          )(if (isRecording) "Stop Recording" else "Record Data").material
         )
       ),
       div(className := "mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50")(
