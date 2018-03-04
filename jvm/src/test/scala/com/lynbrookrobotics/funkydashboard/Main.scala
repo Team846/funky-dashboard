@@ -3,7 +3,7 @@ package com.lynbrookrobotics.funkydashboard
 import scala.io.StdIn
 
 object Main extends App {
-  val dashboard = new FunkyDashboard(125, 8080)
+  val dashboard = new FunkyDashboard(10 , 8080)
 
   dashboard.datasetGroup("Basic Test").addDataset(new TimeSeriesNumeric("Basic Test")(math.random))
 

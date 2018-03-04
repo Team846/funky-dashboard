@@ -4,11 +4,14 @@ import com.lynbrookrobotics.chartjs.Chart
 import slinky.core.Component
 import slinky.core.annotations.react
 import slinky.web.html._
+import org.scalajs.dom._
 import org.scalajs.dom.{CanvasRenderingContext2D, Element, html}
 
 import scala.scalajs.js
 
 @react class SlidingLineChart extends Component {
+  private var lastDrawAt = System.currentTimeMillis()
+
   case class Props(points: Seq[TimedValue[Double]], withNewPoints: Seq[TimedValue[Double]] => Unit)
   type State = Option[Chart]
 
@@ -18,7 +21,22 @@ import scala.scalajs.js
 
   override def initialState: Option[Chart] = None
 
-  var chartElem: Element = null
+  var isMounted = true
+
+  var chartElem: Element = _
+
+  def animate(): Unit = {
+    val now = System.currentTimeMillis()
+    window.console.log("Redrawing " + (now - lastDrawAt))
+    lastDrawAt = now
+    state.foreach(c => drawChart(c))
+
+    window.requestAnimationFrame(_ => {
+      if (isMounted) {
+        animate()
+      }
+    })
+  }
 
   override def componentDidMount(): Unit = {
     val chart = new Chart(
@@ -59,6 +77,10 @@ import scala.scalajs.js
     drawChart(chart)
 
     setState(Some(chart))
+
+    window.requestAnimationFrame { _ =>
+      animate()
+    }
   }
 
   var lastPoints = Seq.empty[TimedValue[Double]]
@@ -99,10 +121,8 @@ import scala.scalajs.js
     }
   }
 
-  override def componentDidUpdate(prevProps: Props, prevState: Option[Chart]): Unit = {
-    state.foreach { c =>
-      drawChart(c)
-    }
+  override def componentWillUnmount(): Unit = {
+    isMounted = false
   }
 
   def render = canvas(ref := (chartElem = _))
